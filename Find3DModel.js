@@ -79,6 +79,7 @@ const sourcing = new ModelSourcingManager(
     process.env.SKETCHFAB_TOKEN
 );
 // Trigger this when the user inputs a medical condition
-sourcing.getDownloadLink("Human heart")
-    .then(data => console.log("Spawn this model:", data.url))
-    .catch(err => console.error(err));
+// sourcing.getDownloadLink("Human heart")
+//     .then(data => console.log("Spawn this model:", data.url))
+//     .catch(err => console.error(err));
+export default new ModelSourcingManager();
