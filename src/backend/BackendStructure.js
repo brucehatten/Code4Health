@@ -1,6 +1,6 @@
-import fileReader from './FileReader.js';
-import sourcingManager from './Find3DModel.js';
-import Exhibit from './Exhibit.js';
+import fileReader from '../services/FileReader.js';
+import sourcingManager from '../services/Find3DModel.js';
+import Exhibit from '../models/Exhibit.js';
 
 class BackendStructure {
     constructor() {
@@ -26,8 +26,8 @@ class BackendStructure {
 
             // 2. Instantiate the Blueprint (One class, many objects)
             const newExhibit = new Exhibit(
-                sceneData.condition, 
-                sceneData.models, 
+                sceneData.condition,
+                sceneData.models,
                 sceneData.story
             );
 

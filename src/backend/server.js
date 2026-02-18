@@ -6,21 +6,21 @@
  * Then open:  http://localhost:3000
  */
 
-const express    = require('express');
-const path       = require('path');
-const fs         = require('fs');
-const os         = require('os');
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const os = require('os');
 const { ApifyClient } = require('apify-client');
 
-const app  = express();
+const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../../public')));
 
 // ── CONFIG ────────────────────────────────────────────────────────────────────
-const APIFY_TOKEN     = 'apify_api_C7106vkfqnIYd7vzjdhcuyMPJ4CPyd0wY0tl';
+const APIFY_TOKEN = 'apify_api_C7106vkfqnIYd7vzjdhcuyMPJ4CPyd0wY0tl';
 const SKETCHFAB_TOKEN = '417dc58517b4449aa0f15348fc16ae2a';
-const APIFY_ACTOR     = 'N3hdEyWDox8xXpahn';
-const PORT            = 3000;
+const APIFY_ACTOR = 'N3hdEyWDox8xXpahn';
+const PORT = 3000;
 
 const apify = new ApifyClient({ token: APIFY_TOKEN });
 
@@ -31,18 +31,18 @@ app.post('/api/search', async (req, res) => {
 
   try {
     const input = {
-      useAI:        false,
+      useAI: false,
       naturalQuery: '',
-      cursor:       '',
-      count:        5,
-      q:            query,
-      tags:         [],
-      categories:   [],
+      cursor: '',
+      count: 5,
+      q: query,
+      tags: [],
+      categories: [],
       downloadable: true,
-      pbr_type:     '',
-      file_format:  '',
-      license:      '',
-      sort_by:      'likes',
+      pbr_type: '',
+      file_format: '',
+      license: '',
+      sort_by: 'likes',
     };
 
     const run = await apify.actor(APIFY_ACTOR).call(input, { waitSecs: 120 });
@@ -54,7 +54,7 @@ app.post('/api/search', async (req, res) => {
     if (!items.length) return res.json({ uid: null, name: query });
 
     const item = items.find(i => i.uid || i.modelId || i.id || i.viewerUrl) || items[0];
-    let uid  = item.uid || item.modelId || item.id || null;
+    let uid = item.uid || item.modelId || item.id || null;
     const name = item.name || item.title || item.modelName || query;
 
     if (!uid && item.viewerUrl) {
@@ -88,7 +88,7 @@ app.get('/api/download/:uid', async (req, res) => {
     if (!sfRes.ok) {
       const txt = await sfRes.text();
       console.error(`[download] Sketchfab ${sfRes.status}:`, txt.slice(0, 200));
-      return res.status(sfRes.status).json({ error: `Sketchfab ${sfRes.status}: ${txt.slice(0,100)}` });
+      return res.status(sfRes.status).json({ error: `Sketchfab ${sfRes.status}: ${txt.slice(0, 100)}` });
     }
 
     const data = await sfRes.json();
@@ -147,7 +147,7 @@ app.get('/api/proxy', async (req, res) => {
 
       // Find the main gltf or glb file
       const gltfEntry = entries.find(e => e.entryName.endsWith('.gltf'));
-      const glbEntry  = entries.find(e => e.entryName.endsWith('.glb'));
+      const glbEntry = entries.find(e => e.entryName.endsWith('.glb'));
 
       if (glbEntry) {
         // GLB is self-contained — serve directly
