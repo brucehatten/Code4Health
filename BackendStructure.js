@@ -15,35 +15,21 @@ class BackendStructure {
      */
     async createNewExhibit(file) {
         try {
-            console.log("Starting generation for new medical exhibit...");
+            const scenesArray = await this.reader.processMedicalScene(file, this.sourcing);
 
-            // 1. Process the file and get raw data (Title, props, story) from Gemini
-            const sceneData = await this.reader.processMedicalScene(file, this.sourcing);
+            // Map the array of data into an array of Exhibit instances
+            const newExhibits = scenesArray.map(data => {
+                const ex = new Exhibit(data.condition, data.models, data.story);
+                this.exhibits.push(ex); // Save to your history
+                return ex;
+            });
 
-            if (!sceneData) {
-                throw new Error("AI failed to return valid scene data.");
-            }
-
-            // 2. Instantiate the Blueprint (One class, many objects)
-            const newExhibit = new Exhibit(
-                sceneData.condition, 
-                sceneData.models, 
-                sceneData.story
-            );
-
-            // 3. Store it in our local "Gallery"
-            this.exhibits.push(newExhibit);
-
-            console.log(`Successfully created exhibit: ${newExhibit.title}`);
-
-            // 4. Return the object for the frontend to render
             return {
                 success: true,
-                data: newExhibit
+                count: newExhibits.length,
+                exhibits: newExhibits
             };
-
         } catch (error) {
-            console.error("Backend coordination failed:", error);
             return { success: false, error: error.message };
         }
     }

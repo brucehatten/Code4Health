@@ -76,25 +76,37 @@ class FileReader {
         try {
             const rawString = await this.askAi(file);
             
-            // Parsing: (Title, p1, p2, p3, story)
-            const items = rawString.replace(/[()]/g, '').split(',').map(item => item.trim());
+            // 1. Split the string into individual exhibit strings
+            // Regex looks for "), (" to split into an array of strings
+            const exhibitStrings = rawString.split(/\)\s*,\s*\(/);
 
-            const title = items[0];
-            const propNames = [items[1], items[2], items[3]];
-            const story = items[4]; // The Fairy Tale
+            const allExhibitsData = await Promise.all(exhibitStrings.map(async (exString) => {
+                // Clean up any lingering parentheses
+                const cleanString = exString.replace(/[()]/g, '');
+                const items = cleanString.split(',').map(item => item.trim());
 
-            // Only search for the 3 props, not the title or story
-            const modelPromises = propNames.map(name => sourcingManager.getDownloadLink(name));
-            const modelResults = await Promise.all(modelPromises);
+                if (items.length < 5) return null;
 
-            return {
-                condition: title,
-                story: story,
-                models: modelResults.filter(m => m !== null)
-            };
+                const title = items[0];
+                const propNames = [items[1], items[2], items[3]];
+                const story = items[4];
+
+                // 2. Fetch 3D models for this specific exhibit
+                const modelResults = await Promise.all(
+                    propNames.map(name => sourcingManager.getDownloadLink(name))
+                );
+
+                return {
+                    condition: title,
+                    story: story,
+                    models: modelResults.filter(m => m !== null)
+                };
+            }));
+
+            return allExhibitsData.filter(ex => ex !== null);
 
         } catch (error) {
-            console.error("Error building scene:", error);
+            console.error("Error building multi-exhibit scene:", error);
         }
     }
 }
