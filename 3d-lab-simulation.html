@@ -1,59 +1,112 @@
+
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>3D Lab Simulation</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
-    
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { overflow: hidden; font-family: 'Rajdhani', sans-serif; background: #050a12; }
 
-    #menu, #labOptions {
-      position: absolute; top: 50%; left: 50%;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow: hidden;
+      font-family: 'Rajdhani', sans-serif;
+      background: #050a12;
+    }
+
+    #menu,
+    #labOptions {
+      position: absolute;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
-      text-align: center; color: white;
+      text-align: center;
+      color: white;
       z-index: 10;
     }
 
     #menu h1 {
-      font-size: 52px; font-weight: 700; letter-spacing: 6px;
+      font-size: 52px;
+      font-weight: 700;
+      letter-spacing: 6px;
       text-transform: uppercase;
       background: linear-gradient(135deg, #00e5ff, #7c4dff, #00e5ff);
       background-size: 200%;
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       animation: shimmer 3s linear infinite;
       margin-bottom: 8px;
     }
+
     #menu p {
       font-family: 'Share Tech Mono', monospace;
-      color: #00e5ff88; font-size: 13px; letter-spacing: 4px;
+      color: #00e5ff88;
+      font-size: 13px;
+      letter-spacing: 4px;
       margin-bottom: 40px;
     }
 
-    @keyframes shimmer { 0%,100%{background-position:0%} 50%{background-position:200%} }
+    @keyframes shimmer {
+
+      0%,
+      100% {
+        background-position: 0%
+      }
+
+      50% {
+        background-position: 200%
+      }
+    }
 
     .btn {
       font-family: 'Rajdhani', sans-serif;
-      font-size: 18px; font-weight: 600; letter-spacing: 3px;
-      padding: 14px 36px; margin: 8px;
-      border: none; border-radius: 4px;
-      cursor: pointer; transition: all 0.25s;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      padding: 14px 36px;
+      margin: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.25s;
       text-transform: uppercase;
-      position: relative; overflow: hidden;
+      position: relative;
+      overflow: hidden;
     }
+
     .btn-primary {
       background: linear-gradient(135deg, #00b8d4, #6200ea);
       color: white;
       box-shadow: 0 0 30px #00e5ff44, 0 4px 20px #00000088;
     }
+
     .btn-primary::before {
-      content: ''; position: absolute; inset: 0;
+      content: '';
+      position: absolute;
+      inset: 0;
       background: linear-gradient(135deg, #00e5ff, #7c4dff);
-      opacity: 0; transition: opacity 0.25s;
+      opacity: 0;
+      transition: opacity 0.25s;
     }
-    .btn-primary:hover::before { opacity: 1; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px #00e5ff66, 0 8px 30px #00000099; }
-    .btn-primary span { position: relative; z-index: 1; }
+
+    .btn-primary:hover::before {
+      opacity: 1;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 50px #00e5ff66, 0 8px 30px #00000099;
+    }
+
+    .btn-primary span {
+      position: relative;
+      z-index: 1;
+    }
 
     .btn-secondary {
       background: transparent;
@@ -61,6 +114,7 @@
       border: 1px solid #00e5ff55;
       box-shadow: 0 0 20px #00e5ff22 inset;
     }
+
     .btn-secondary:hover {
       background: #00e5ff15;
       border-color: #00e5ff;
@@ -69,599 +123,675 @@
     }
 
     #labOptions h2 {
-      font-size: 28px; letter-spacing: 5px; text-transform: uppercase;
-      color: #00e5ff; margin-bottom: 30px;
+      font-size: 28px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: #00e5ff;
+      margin-bottom: 30px;
       font-weight: 600;
     }
 
-    /* HUD */
     #hud {
-      position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
       display: none;
       font-family: 'Share Tech Mono', monospace;
-      color: #00e5ffbb; font-size: 12px; letter-spacing: 2px;
-      background: #00000088; backdrop-filter: blur(10px);
-      padding: 10px 24px; border-radius: 40px;
+      color: #00e5ffbb;
+      font-size: 12px;
+      letter-spacing: 2px;
+      background: #00000088;
+      backdrop-filter: blur(10px);
+      padding: 10px 24px;
+      border-radius: 40px;
       border: 1px solid #00e5ff22;
-      z-index: 10; text-align: center;
+      z-index: 10;
+      text-align: center;
     }
-    #hud span { margin: 0 12px; }
+
+    #hud span {
+      margin: 0 12px;
+    }
+
     #hud .key {
-      background: #00e5ff22; border: 1px solid #00e5ff44;
-      padding: 2px 7px; border-radius: 3px; font-size: 11px;
+      background: #00e5ff22;
+      border: 1px solid #00e5ff44;
+      padding: 2px 7px;
+      border-radius: 3px;
+      font-size: 11px;
     }
 
     #modeIndicator {
-      position: absolute; top: 20px; right: 24px;
+      position: absolute;
+      top: 20px;
+      right: 24px;
       font-family: 'Share Tech Mono', monospace;
-      color: #00e5ff99; font-size: 11px; letter-spacing: 3px;
-      background: #00000066; backdrop-filter: blur(10px);
-      padding: 8px 16px; border-radius: 4px;
+      color: #00e5ff99;
+      font-size: 11px;
+      letter-spacing: 3px;
+      background: #00000066;
+      backdrop-filter: blur(10px);
+      padding: 8px 16px;
+      border-radius: 4px;
       border: 1px solid #00e5ff22;
-      display: none; z-index: 10;
+      display: none;
+      z-index: 10;
     }
 
-    /* Entry scene overlay */
     #entryOverlay {
-      position: absolute; inset: 0;
+      position: absolute;
+      inset: 0;
       background: radial-gradient(ellipse at center, #050a1200 40%, #050a12 100%);
-      pointer-events: none; z-index: 5;
+      pointer-events: none;
+      z-index: 5;
     }
 
-    canvas { display: block; position: absolute; inset: 0; }
+    canvas {
+      display: block;
+      position: absolute;
+      inset: 0;
+    }
   </style>
 </head>
+
 <body>
 
-<div id="entryOverlay"></div>
-<canvas id="labCanvas"></canvas>
+  <div id="entryOverlay"></div>
+  <canvas id="labCanvas"></canvas>
 
-<div id="menu">
-  <h1>MedLab 3D</h1>
-  <p>VIRTUAL SIMULATION ENVIRONMENT</p>
-  <button class="btn btn-primary" id="playBtn"><span>Enter Lab</span></button>
-</div>
+  <div id="menu">
+    <h1>MedLab 3D</h1>
+    <p>VIRTUAL SIMULATION ENVIRONMENT</p>
+    <button class="btn btn-primary" id="playBtn"><span>Enter Lab</span></button>
+  </div>
 
-<div id="labOptions" style="display:none;">
-  <h2>Lab Setup</h2>
-  <button class="btn btn-secondary" id="notesBtn">Insert Notes</button>
-  <button class="btn btn-secondary" id="filesBtn">Upload Files</button>
-  <input type="file" id="fileInput" style="display:none;" multiple>
-  <br><br>
-  <button class="btn btn-primary" id="skipBtn"><span>Skip → Enter Lab</span></button>
-</div>
+  <div id="labOptions" style="display:none;">
+    <h2>Lab Setup</h2>
+    <button class="btn btn-secondary" id="notesBtn">Insert Notes</button>
+    <button class="btn btn-secondary" id="filesBtn">Upload Files</button>
+    <input type="file" id="fileInput" style="display:none;" multiple>
+    <br><br>
+    <button class="btn btn-primary" id="skipBtn"><span>Skip → Enter Lab</span></button>
+  </div>
 
-<div id="hud">
-  <span><span class="key">W/S</span> Move</span>
-  <span><span class="key">Q/E</span> Turn</span>
-  <span><span class="key">A/D</span> Strafe</span>
-  <span><span class="key">5</span> Toggle View</span>
-</div>
+  <div id="hud">
+    <span><span class="key">Click</span> Move</span>
+    <span><span class="key">Q/E</span> Turn</span>
+    <span><span class="key">5</span> Toggle View</span>
+  </div>
 
-<div id="modeIndicator" id="modeIndicator">FIRST PERSON</div>
+  <div id="modeIndicator">FIRST PERSON</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-<script>
-const menu = document.getElementById("menu");
-const labOptions = document.getElementById("labOptions");
-const labCanvas = document.getElementById("labCanvas");
-const hud = document.getElementById("hud");
-const modeIndicator = document.getElementById("modeIndicator");
+  <script>
+    const menu = document.getElementById("menu");
+    const labOptions = document.getElementById("labOptions");
+    const labCanvas = document.getElementById("labCanvas");
+    const hud = document.getElementById("hud");
+    const modeIndicator = document.getElementById("modeIndicator");
 
-// ── ENTRY SCENE ───────────────────────────────────────────────────────────────
-const entryScene = new THREE.Scene();
-entryScene.background = new THREE.Color(0x050a12);
-entryScene.fog = new THREE.Fog(0x050a12, 10, 40);
+    // ── ENTRY SCENE ───────────────────────────────────────────────────────────────
+    const entryScene = new THREE.Scene();
+    entryScene.background = new THREE.Color(0x050a12);
+    entryScene.fog = new THREE.Fog(0x050a12, 10, 40);
 
-const entryCamera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
-entryCamera.position.z = 10;
+    const entryCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    entryCamera.position.z = 10;
 
-const entryRenderer = new THREE.WebGLRenderer({canvas: labCanvas, antialias: true});
-entryRenderer.setSize(window.innerWidth, window.innerHeight);
-entryRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const entryRenderer = new THREE.WebGLRenderer({ canvas: labCanvas, antialias: true });
+    entryRenderer.setSize(window.innerWidth, window.innerHeight);
+    entryRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-// Floating DNA helix-ish particles
-const particlesGeo = new THREE.BufferGeometry();
-const pCount = 200;
-const pPos = new Float32Array(pCount * 3);
-for (let i = 0; i < pCount; i++) {
-  pPos[i*3]   = (Math.random()-0.5)*30;
-  pPos[i*3+1] = (Math.random()-0.5)*30;
-  pPos[i*3+2] = (Math.random()-0.5)*30;
-}
-particlesGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-const particlesMat = new THREE.PointsMaterial({ color: 0x00e5ff, size: 0.08, transparent: true, opacity: 0.7 });
-entryScene.add(new THREE.Points(particlesGeo, particlesMat));
-
-// Glowing torus rings
-for (let i = 0; i < 3; i++) {
-  const torus = new THREE.Mesh(
-    new THREE.TorusGeometry(2 + i*1.5, 0.04, 8, 80),
-    new THREE.MeshBasicMaterial({ color: i===0 ? 0x00e5ff : i===1 ? 0x7c4dff : 0x00b8d4, transparent: true, opacity: 0.5 - i*0.1 })
-  );
-  torus.rotation.x = Math.PI/3 * i;
-  torus.rotation.z = Math.PI/4 * i;
-  torus.userData.speed = 0.003 + i*0.002;
-  torus.userData.axis = new THREE.Vector3(Math.random(), Math.random(), Math.random()).normalize();
-  entryScene.add(torus);
-}
-
-entryScene.add(new THREE.AmbientLight(0x00e5ff, 0.2));
-
-let entryRunning = true;
-function animateEntry() {
-  if (!entryRunning) return;
-  requestAnimationFrame(animateEntry);
-  const t = Date.now() * 0.001;
-  entryScene.children.forEach(obj => {
-    if (obj.userData.axis) obj.rotateOnAxis(obj.userData.axis, obj.userData.speed);
-  });
-  entryCamera.position.x = Math.sin(t * 0.1) * 2;
-  entryCamera.position.y = Math.cos(t * 0.07) * 1;
-  entryCamera.lookAt(0, 0, 0);
-  entryRenderer.render(entryScene, entryCamera);
-}
-animateEntry();
-
-// ── MENU BUTTONS ─────────────────────────────────────────────────────────────
-document.getElementById("playBtn").addEventListener("click", () => {
-  menu.style.display = "none";
-  labOptions.style.display = "block";
-});
-
-document.getElementById("notesBtn").addEventListener("click", () => {
-  const note = prompt("Insert your note:");
-  if (note) alert("Note saved: " + note);
-});
-
-const fileInput = document.getElementById("fileInput");
-document.getElementById("filesBtn").addEventListener("click", () => fileInput.click());
-fileInput.addEventListener("change", event => {
-  if (event.target.files.length > 0) {
-    labOptions.style.display = "none";
-    entryRunning = false;
-    startLabSimulation();
-  }
-});
-
-document.getElementById("skipBtn").addEventListener("click", () => {
-  labOptions.style.display = "none";
-  entryRunning = false;
-  startLabSimulation();
-});
-
-// ── LAB SIMULATION ────────────────────────────────────────────────────────────
-function startLabSimulation() {
-  hud.style.display = "block";
-  modeIndicator.style.display = "block";
-
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0a0f1a);
-  scene.fog = new THREE.FogExp2(0x0a0f1a, 0.015);
-
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 200);
-  camera.position.set(0, 3.2, 12);
-
-  const renderer = new THREE.WebGLRenderer({ canvas: labCanvas, antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.9;
-
-  // ── LIGHTING ──
-  // Ambient — cool blue base
-  scene.add(new THREE.AmbientLight(0x1a2a4a, 1.2));
-
-  // Main overhead fluorescent strips (cool white)
-  const stripPositions = [
-    [-12, 7, -12], [0, 7, -12], [12, 7, -12],
-    [-12, 7, 0],   [0, 7, 0],   [12, 7, 0],
-    [-12, 7, 12],  [0, 7, 12],  [12, 7, 12],
-  ];
-  stripPositions.forEach(([x, y, z]) => {
-    const strip = new THREE.RectAreaLight ? null : null; // fallback to point
-    const light = new THREE.PointLight(0xd0eeff, 0.8, 20);
-    light.position.set(x, y, z);
-    light.castShadow = true;
-    light.shadow.mapSize.width = 512;
-    light.shadow.mapSize.height = 512;
-    light.shadow.radius = 4;
-    scene.add(light);
-
-    // Visual tube for the fluorescent strip
-    const stripMesh = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.06, 0.06, 2.5, 8),
-      new THREE.MeshBasicMaterial({ color: 0xd0eeff, transparent: true, opacity: 0.9 })
-    );
-    stripMesh.rotation.z = Math.PI / 2;
-    stripMesh.position.set(x, 7.15, z);
-    scene.add(stripMesh);
-
-    // Glow halo
-    const haloGeo = new THREE.PlaneGeometry(3, 0.8);
-    const haloMat = new THREE.MeshBasicMaterial({ color: 0xd0eeff, transparent: true, opacity: 0.08, side: THREE.DoubleSide });
-    const halo = new THREE.Mesh(haloGeo, haloMat);
-    halo.position.set(x, 7.1, z);
-    halo.rotation.x = Math.PI / 2;
-    scene.add(halo);
-  });
-
-  // Accent colored lights (teal)
-  const teal = new THREE.PointLight(0x00e5ff, 0.4, 30);
-  teal.position.set(-18, 3, -18);
-  scene.add(teal);
-  const purple = new THREE.PointLight(0x7c4dff, 0.3, 30);
-  purple.position.set(18, 3, 18);
-  scene.add(purple);
-
-  // ── ROOM ──
-  const roomW = 52, roomH = 9, roomD = 52;
-  const wallMat = new THREE.MeshStandardMaterial({
-    color: 0xc8d4e0,
-    roughness: 0.85,
-    metalness: 0.0,
-    side: THREE.BackSide
-  });
-  const room = new THREE.Mesh(new THREE.BoxGeometry(roomW, roomH, roomD), wallMat);
-  room.position.y = roomH / 2;
-  room.receiveShadow = true;
-  scene.add(room);
-
-  // Wall accent strip (glowing teal line near ceiling)
-  const accentMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.3 });
-  [[0,8.3,0,roomW,0.06,0.15],[0,8.3,0,0.15,0.06,roomD]].forEach(([x,y,z,w,h,d])=>{
-    // Do all 4 walls
-  });
-  const accentPositions = [
-    {pos:[0, 8.3, -roomD/2+0.1], size:[roomW, 0.06, 0.12]},
-    {pos:[0, 8.3,  roomD/2-0.1], size:[roomW, 0.06, 0.12]},
-    {pos:[-roomW/2+0.1, 8.3, 0], size:[0.12, 0.06, roomD]},
-    {pos:[ roomW/2-0.1, 8.3, 0], size:[0.12, 0.06, roomD]},
-  ];
-  accentPositions.forEach(({pos, size}) => {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), accentMat);
-    mesh.position.set(...pos);
-    scene.add(mesh);
-  });
-
-  // ── TILED FLOOR ──
-  // Create checkerboard tile texture via canvas
-  function makeTileTexture(size=512, tileCount=8) {
-    const c = document.createElement('canvas');
-    c.width = c.height = size;
-    const ctx = c.getContext('2d');
-
-    // Base tile color
-    ctx.fillStyle = '#b8c8d4';
-    ctx.fillRect(0, 0, size, size);
-
-    const tileSize = size / tileCount;
-    for (let tx = 0; tx < tileCount; tx++) {
-      for (let ty = 0; ty < tileCount; ty++) {
-        const x = tx * tileSize, y = ty * tileSize;
-        // Subtle alternating shade
-        const shade = (tx + ty) % 2 === 0 ? '#b8c8d4' : '#a8b8c4';
-        ctx.fillStyle = shade;
-        ctx.fillRect(x, y, tileSize, tileSize);
-        // Grout lines
-        ctx.strokeStyle = '#8898a4';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x+1, y+1, tileSize-2, tileSize-2);
-        // Highlight corner
-        ctx.fillStyle = '#ccdae488';
-        ctx.fillRect(x+2, y+2, tileSize*0.25, tileSize*0.08);
-      }
+    const particlesGeo = new THREE.BufferGeometry();
+    const pCount = 200;
+    const pPos = new Float32Array(pCount * 3);
+    for (let i = 0; i < pCount; i++) {
+      pPos[i * 3] = (Math.random() - 0.5) * 30;
+      pPos[i * 3 + 1] = (Math.random() - 0.5) * 30;
+      pPos[i * 3 + 2] = (Math.random() - 0.5) * 30;
     }
-    const tex = new THREE.CanvasTexture(c);
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(6, 6);
-    return tex;
-  }
+    particlesGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+    const particlesMat = new THREE.PointsMaterial({ color: 0x00e5ff, size: 0.08, transparent: true, opacity: 0.7 });
+    entryScene.add(new THREE.Points(particlesGeo, particlesMat));
 
-  function makeTileNormalMap(size=512, tileCount=8) {
-    const c = document.createElement('canvas');
-    c.width = c.height = size;
-    const ctx = c.getContext('2d');
-    ctx.fillStyle = '#8080ff';
-    ctx.fillRect(0, 0, size, size);
-    const tileSize = size / tileCount;
-    ctx.strokeStyle = '#6868ff';
-    ctx.lineWidth = 3;
-    for (let tx = 0; tx <= tileCount; tx++) {
-      ctx.beginPath(); ctx.moveTo(tx*tileSize, 0); ctx.lineTo(tx*tileSize, size); ctx.stroke();
+    for (let i = 0; i < 3; i++) {
+      const torus = new THREE.Mesh(
+        new THREE.TorusGeometry(2 + i * 1.5, 0.04, 8, 80),
+        new THREE.MeshBasicMaterial({ color: i === 0 ? 0x00e5ff : i === 1 ? 0x7c4dff : 0x00b8d4, transparent: true, opacity: 0.5 - i * 0.1 })
+      );
+      torus.rotation.x = Math.PI / 3 * i;
+      torus.rotation.z = Math.PI / 4 * i;
+      torus.userData.speed = 0.003 + i * 0.002;
+      torus.userData.axis = new THREE.Vector3(Math.random(), Math.random(), Math.random()).normalize();
+      entryScene.add(torus);
     }
-    for (let ty = 0; ty <= tileCount; ty++) {
-      ctx.beginPath(); ctx.moveTo(0, ty*tileSize); ctx.lineTo(size, ty*tileSize); ctx.stroke();
+
+    entryScene.add(new THREE.AmbientLight(0x00e5ff, 0.2));
+
+    let entryRunning = true;
+    function animateEntry() {
+      if (!entryRunning) return;
+      requestAnimationFrame(animateEntry);
+      const t = Date.now() * 0.001;
+      entryScene.children.forEach(obj => {
+        if (obj.userData.axis) obj.rotateOnAxis(obj.userData.axis, obj.userData.speed);
+      });
+      entryCamera.position.x = Math.sin(t * 0.1) * 2;
+      entryCamera.position.y = Math.cos(t * 0.07) * 1;
+      entryCamera.lookAt(0, 0, 0);
+      entryRenderer.render(entryScene, entryCamera);
     }
-    const tex = new THREE.CanvasTexture(c);
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(6, 6);
-    return tex;
-  }
+    animateEntry();
 
-  const floorMat = new THREE.MeshStandardMaterial({
-    map: makeTileTexture(),
-    normalMap: makeTileNormalMap(),
-    normalScale: new THREE.Vector2(0.3, 0.3),
-    roughness: 0.3,
-    metalness: 0.1,
-    envMapIntensity: 0.5,
-  });
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(roomW, roomD, 1, 1), floorMat);
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  scene.add(floor);
-
-  // Floor reflection plane (fake glossy reflection)
-  const reflMat = new THREE.MeshBasicMaterial({ color: 0xd0eeff, transparent: true, opacity: 0.04 });
-  const refl = new THREE.Mesh(new THREE.PlaneGeometry(roomW, roomD), reflMat);
-  refl.rotation.x = -Math.PI / 2;
-  refl.position.y = 0.01;
-  scene.add(refl);
-
-  // ── LAB TABLE MODEL ──
-  function makeLabTable(x, z) {
-    const group = new THREE.Group();
-
-    // Tabletop — white laminate
-    const topMat = new THREE.MeshStandardMaterial({ color: 0xf0f4f8, roughness: 0.3, metalness: 0.05 });
-    const top = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.08, 1.8), topMat);
-    top.position.y = 1.8;
-    top.castShadow = true;
-    top.receiveShadow = true;
-    group.add(top);
-
-    // Tabletop edge banding (darker)
-    const edgeMat = new THREE.MeshStandardMaterial({ color: 0xc0c8d0, roughness: 0.5, metalness: 0.1 });
-    const edgeFront = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.09, 0.04), edgeMat);
-    edgeFront.position.set(0, 1.8, 0.92);
-    group.add(edgeFront);
-    const edgeBack = edgeFront.clone(); edgeBack.position.z = -0.92; group.add(edgeBack);
-
-    // Cabinet body below tabletop
-    const cabinetMat = new THREE.MeshStandardMaterial({ color: 0x9aafbf, roughness: 0.6, metalness: 0.05 });
-    const cabinet = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.9, 1.6), cabinetMat);
-    cabinet.position.y = 1.3;
-    cabinet.castShadow = true;
-    cabinet.receiveShadow = true;
-    group.add(cabinet);
-
-    // Cabinet doors (2)
-    const doorMat = new THREE.MeshStandardMaterial({ color: 0xb0c4d4, roughness: 0.4, metalness: 0.08 });
-    [-0.76, 0.76].forEach(dx => {
-      const door = new THREE.Mesh(new THREE.BoxGeometry(1.38, 0.82, 0.04), doorMat);
-      door.position.set(dx, 1.3, 0.82);
-      group.add(door);
-      // Handle
-      const handleMat = new THREE.MeshStandardMaterial({ color: 0xe0e8f0, roughness: 0.2, metalness: 0.8 });
-      const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.35, 8), handleMat);
-      handle.rotation.z = Math.PI / 2;
-      handle.position.set(dx, 1.3, 0.87);
-      group.add(handle);
+    // ── MENU BUTTONS ─────────────────────────────────────────────────────────────
+    document.getElementById("playBtn").addEventListener("click", () => {
+      menu.style.display = "none";
+      labOptions.style.display = "block";
     });
 
-    // 4 Metal legs
-    const legMat = new THREE.MeshStandardMaterial({ color: 0xd0d8e0, roughness: 0.3, metalness: 0.7 });
-    [[-1.4, 0.7], [1.4, 0.7], [-1.4, -0.7], [1.4, -0.7]].forEach(([lx, lz]) => {
-      // Outer square leg
-      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.84, 0.07), legMat);
-      leg.position.set(lx, 0.42, lz);
-      leg.castShadow = true;
-      group.add(leg);
-      // Foot pad
-      const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.05, 8), new THREE.MeshStandardMaterial({color: 0x444444, roughness:0.9}));
-      foot.position.set(lx, 0.025, lz);
-      group.add(foot);
+    document.getElementById("notesBtn").addEventListener("click", () => {
+      const note = prompt("Insert your note:");
+      if (note) alert("Note saved: " + note);
     });
 
-    // Cross brace
-    const braceMat = new THREE.MeshStandardMaterial({ color: 0xc0c8d0, roughness: 0.4, metalness: 0.5 });
-    const brace = new THREE.Mesh(new THREE.BoxGeometry(2.82, 0.05, 0.05), braceMat);
-    brace.position.y = 0.6;
-    group.add(brace);
-    const brace2 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 1.36), braceMat);
-    brace2.position.y = 0.6;
-    group.add(brace2);
-
-    group.position.set(x, 0, z);
-    group.castShadow = true;
-    scene.add(group);
-    return group;
-  }
-
-  // Lab equipment on tables
-  function addEquipment(tableGroup, x, z) {
-    // Microscope-ish shape
-    const eqMat = new THREE.MeshStandardMaterial({ color: 0x2a3a4a, roughness: 0.4, metalness: 0.6 });
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 0.06, 12), eqMat);
-    base.position.set(x, 1.87, z);
-    scene.add(base);
-    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.7, 8), eqMat);
-    arm.position.set(x, 2.22, z);
-    scene.add(arm);
-    const head2 = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 10), new THREE.MeshStandardMaterial({color:0x1a2a3a, roughness:0.3, metalness:0.7}));
-    head2.position.set(x+0.12, 2.55, z);
-    scene.add(head2);
-
-    // Beaker
-    const beakerMat = new THREE.MeshStandardMaterial({ color: 0x88c8ff, transparent: true, opacity: 0.45, roughness: 0.05, metalness: 0.0 });
-    const beaker = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.22, 12), beakerMat);
-    beaker.position.set(x-0.5, 1.95, z+0.2);
-    scene.add(beaker);
-
-    // Liquid inside
-    const liquidMat = new THREE.MeshStandardMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.7, roughness:0.1 });
-    const liquid = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.06, 0.12, 12), liquidMat);
-    liquid.position.set(x-0.5, 1.9, z+0.2);
-    scene.add(liquid);
-
-    // Petri dish
-    const dishMat = new THREE.MeshStandardMaterial({ color: 0xeef4ff, transparent: true, opacity: 0.5, roughness:0.1 });
-    const dish = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.03, 16), dishMat);
-    dish.position.set(x+0.4, 1.855, z-0.2);
-    scene.add(dish);
-  }
-
-  // Place tables in a grid
-  const tablePositions = [
-    [-15, -15], [-5, -15], [5, -15], [15, -15],
-    [-15,   0], [-5,   0], [5,   0], [15,   0],
-    [-15,  15], [-5,  15], [5,  15], [15,  15],
-  ];
-
-  tablePositions.forEach(([x, z]) => {
-    makeLabTable(x, z);
-    addEquipment(null, x, z);
-  });
-
-  // ── WALL CABINETS ──
-  const cabinetWallMat = new THREE.MeshStandardMaterial({ color: 0x9aafc0, roughness: 0.5, metalness: 0.05 });
-  [-24, -12, 0, 12, 24].forEach(x => {
-    // Upper wall cabinet
-    const cab = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.2, 0.5), cabinetWallMat);
-    cab.position.set(x, 6.5, -roomD/2+0.5);
-    cab.castShadow = true;
-    scene.add(cab);
-    // Cabinet door
-    const d = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.0, 0.06), new THREE.MeshStandardMaterial({color:0xb0c8d8, roughness:0.4, metalness:0.1}));
-    d.position.set(x, 6.5, -roomD/2+0.78);
-    scene.add(d);
-  });
-
-  // ── PLAYER ──
-  const player = new THREE.Group();
-  scene.add(player);
-
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 });
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.4, 0.4), bodyMat);
-  body.position.y = 2.1;
-  body.castShadow = true;
-  player.add(body);
-
-  // Lab coat detail
-  const coatMat = new THREE.MeshStandardMaterial({ color: 0xeef4ff, roughness: 0.9 });
-  const coat = new THREE.Mesh(new THREE.BoxGeometry(0.72, 1.42, 0.42), coatMat);
-  coat.position.y = 2.1;
-  player.add(coat);
-
-  const headMat = new THREE.MeshStandardMaterial({ color: 0xffccaa, roughness: 0.9 });
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.6, 0.55), headMat);
-  head.position.y = 3.2;
-  head.castShadow = true;
-  player.add(head);
-
-  const legMat = new THREE.MeshStandardMaterial({ color: 0x334455, roughness: 0.9 });
-  const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.28, 1.0, 0.28), legMat);
-  leftLeg.position.set(-0.2, 1.0, 0);
-  leftLeg.castShadow = true;
-  player.add(leftLeg);
-
-  const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.28, 1.0, 0.28), legMat);
-  rightLeg.position.set(0.2, 1.0, 0);
-  rightLeg.castShadow = true;
-  player.add(rightLeg);
-
-  player.position.set(0, 0, 6);
-
-  // ── CONTROLS ──
-  const keys = {};
-  document.addEventListener("keydown", e => {
-    keys[e.code] = true;
-    if (e.code === "Digit5") {
-      firstPerson = !firstPerson;
-      modeIndicator.textContent = firstPerson ? "FIRST PERSON" : "THIRD PERSON";
-    }
-  });
-  document.addEventListener("keyup", e => keys[e.code] = false);
-
-  let firstPerson = true;
-  let walkTime = 0;
-  const half = roomW / 2 - 1;
-
-  function animateLab() {
-    requestAnimationFrame(animateLab);
-
-    const speed = 0.12;
-    let walking = false;
-    const dir = new THREE.Vector3();
-
-    if (keys["KeyW"]) {
-      dir.set(0, 0, -1).applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
-      player.position.addScaledVector(dir, speed);
-      walking = true;
-    }
-    if (keys["KeyS"]) {
-      dir.set(0, 0, 1).applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
-      player.position.addScaledVector(dir, speed);
-      walking = true;
-    }
-    if (keys["KeyA"]) {
-      dir.set(-1, 0, 0).applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
-      player.position.addScaledVector(dir, speed);
-      walking = true;
-    }
-    if (keys["KeyD"]) {
-      dir.set(1, 0, 0).applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
-      player.position.addScaledVector(dir, speed);
-      walking = true;
-    }
-    if (keys["KeyQ"]) player.rotation.y += 0.04;
-    if (keys["KeyE"]) player.rotation.y -= 0.04;
-
-    // Clamp
-    player.position.x = Math.max(-half, Math.min(half, player.position.x));
-    player.position.z = Math.max(-half, Math.min(half, player.position.z));
-
-    // Walk animation
-    if (walking) {
-      walkTime += 0.25;
-      leftLeg.rotation.x  =  Math.sin(walkTime) * 0.7;
-      rightLeg.rotation.x = -Math.sin(walkTime) * 0.7;
-      body.position.y = 2.1 + Math.abs(Math.sin(walkTime * 2)) * 0.02;
-    } else {
-      leftLeg.rotation.x = 0;
-      rightLeg.rotation.x = 0;
-    }
-
-    // Camera
-    if (firstPerson) {
-      const eyePos = player.position.clone().add(new THREE.Vector3(0, 3.2, 0));
-      camera.position.copy(eyePos);
-      const lookDir = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
-      camera.lookAt(eyePos.clone().add(lookDir));
-    } else {
-      const offset = new THREE.Vector3(0, 7, 14);
-      camera.position.copy(player.position).add(offset);
-      camera.lookAt(player.position.clone().add(new THREE.Vector3(0, 2, 0)));
-    }
-
-    // Subtle light flicker
-    const t = Date.now() * 0.001;
-    scene.children.forEach(child => {
-      if (child.isPointLight && child.color.b > 0.8) {
-        child.intensity = 0.8 + Math.sin(t * 60 + child.position.x) * 0.01;
+    const fileInput = document.getElementById("fileInput");
+    document.getElementById("filesBtn").addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", event => {
+      if (event.target.files.length > 0) {
+        labOptions.style.display = "none";
+        entryRunning = false;
+        startLabSimulation();
       }
     });
 
-    renderer.render(scene, camera);
-  }
-  animateLab();
+    document.getElementById("skipBtn").addEventListener("click", () => {
+      labOptions.style.display = "none";
+      entryRunning = false;
+      startLabSimulation();
+    });
 
-  window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-}
+    // ── LAB SIMULATION ────────────────────────────────────────────────────────────
+    function startLabSimulation() {
+      hud.style.display = "block";
+      modeIndicator.style.display = "block";
 
-window.addEventListener("resize", () => {
-  entryCamera.aspect = window.innerWidth / window.innerHeight;
-  entryCamera.updateProjectionMatrix();
-  entryRenderer.setSize(window.innerWidth, window.innerHeight);
-});
-</script>
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a0f1a);
+      scene.fog = new THREE.FogExp2(0x0a0f1a, 0.015);
+
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 200);
+      camera.position.set(0, 3.2, 12);
+
+      const renderer = new THREE.WebGLRenderer({ canvas: labCanvas, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 0.9;
+
+      // ── LIGHTING ──
+      scene.add(new THREE.AmbientLight(0x1a2a4a, 1.2));
+
+      const stripPositions = [
+        [-12, 7, -12], [0, 7, -12], [12, 7, -12],
+        [-12, 7, 0], [0, 7, 0], [12, 7, 0],
+        [-12, 7, 12], [0, 7, 12], [12, 7, 12],
+      ];
+      stripPositions.forEach(([x, y, z]) => {
+        const light = new THREE.PointLight(0xd0eeff, 0.8, 20);
+        light.position.set(x, y, z);
+        light.castShadow = true;
+        light.shadow.mapSize.width = 512;
+        light.shadow.mapSize.height = 512;
+        light.shadow.radius = 4;
+        scene.add(light);
+
+        const stripMesh = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.06, 0.06, 2.5, 8),
+          new THREE.MeshBasicMaterial({ color: 0xd0eeff, transparent: true, opacity: 0.9 })
+        );
+        stripMesh.rotation.z = Math.PI / 2;
+        stripMesh.position.set(x, 7.15, z);
+        scene.add(stripMesh);
+
+        const haloGeo = new THREE.PlaneGeometry(3, 0.8);
+        const haloMat = new THREE.MeshBasicMaterial({ color: 0xd0eeff, transparent: true, opacity: 0.08, side: THREE.DoubleSide });
+        const halo = new THREE.Mesh(haloGeo, haloMat);
+        halo.position.set(x, 7.1, z);
+        halo.rotation.x = Math.PI / 2;
+        scene.add(halo);
+      });
+
+      const teal = new THREE.PointLight(0x00e5ff, 0.4, 30);
+      teal.position.set(-18, 3, -18);
+      scene.add(teal);
+      const purple = new THREE.PointLight(0x7c4dff, 0.3, 30);
+      purple.position.set(18, 3, 18);
+      scene.add(purple);
+
+      // ── ROOM ──
+      const roomW = 52, roomH = 9, roomD = 52;
+      const wallMat = new THREE.MeshStandardMaterial({
+        color: 0xc8d4e0,
+        roughness: 0.85,
+        metalness: 0.0,
+        side: THREE.BackSide
+      });
+      const room = new THREE.Mesh(new THREE.BoxGeometry(roomW, roomH, roomD), wallMat);
+      room.position.y = roomH / 2;
+      room.receiveShadow = true;
+      scene.add(room);
+
+      const accentMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.3 });
+      const accentPositions = [
+        { pos: [0, 8.3, -roomD / 2 + 0.1], size: [roomW, 0.06, 0.12] },
+        { pos: [0, 8.3, roomD / 2 - 0.1], size: [roomW, 0.06, 0.12] },
+        { pos: [-roomW / 2 + 0.1, 8.3, 0], size: [0.12, 0.06, roomD] },
+        { pos: [roomW / 2 - 0.1, 8.3, 0], size: [0.12, 0.06, roomD] },
+      ];
+      accentPositions.forEach(({ pos, size }) => {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), accentMat);
+        mesh.position.set(...pos);
+        scene.add(mesh);
+      });
+
+      // ── TILED FLOOR ──
+      function makeTileTexture(size = 512, tileCount = 8) {
+        const c = document.createElement('canvas');
+        c.width = c.height = size;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#b8c8d4';
+        ctx.fillRect(0, 0, size, size);
+        const tileSize = size / tileCount;
+        for (let tx = 0; tx < tileCount; tx++) {
+          for (let ty = 0; ty < tileCount; ty++) {
+            const x = tx * tileSize, y = ty * tileSize;
+            const shade = (tx + ty) % 2 === 0 ? '#b8c8d4' : '#a8b8c4';
+            ctx.fillStyle = shade;
+            ctx.fillRect(x, y, tileSize, tileSize);
+            ctx.strokeStyle = '#8898a4';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x + 1, y + 1, tileSize - 2, tileSize - 2);
+            ctx.fillStyle = '#ccdae488';
+            ctx.fillRect(x + 2, y + 2, tileSize * 0.25, tileSize * 0.08);
+          }
+        }
+        const tex = new THREE.CanvasTexture(c);
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(6, 6);
+        return tex;
+      }
+
+      function makeTileNormalMap(size = 512, tileCount = 8) {
+        const c = document.createElement('canvas');
+        c.width = c.height = size;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#8080ff';
+        ctx.fillRect(0, 0, size, size);
+        const tileSize = size / tileCount;
+        ctx.strokeStyle = '#6868ff';
+        ctx.lineWidth = 3;
+        for (let tx = 0; tx <= tileCount; tx++) {
+          ctx.beginPath(); ctx.moveTo(tx * tileSize, 0); ctx.lineTo(tx * tileSize, size); ctx.stroke();
+        }
+        for (let ty = 0; ty <= tileCount; ty++) {
+          ctx.beginPath(); ctx.moveTo(0, ty * tileSize); ctx.lineTo(size, ty * tileSize); ctx.stroke();
+        }
+        const tex = new THREE.CanvasTexture(c);
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(6, 6);
+        return tex;
+      }
+
+      const floorMat = new THREE.MeshStandardMaterial({
+        map: makeTileTexture(),
+        normalMap: makeTileNormalMap(),
+        normalScale: new THREE.Vector2(0.3, 0.3),
+        roughness: 0.3,
+        metalness: 0.1,
+        envMapIntensity: 0.5,
+      });
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(roomW, roomD, 1, 1), floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      const reflMat = new THREE.MeshBasicMaterial({ color: 0xd0eeff, transparent: true, opacity: 0.04 });
+      const refl = new THREE.Mesh(new THREE.PlaneGeometry(roomW, roomD), reflMat);
+      refl.rotation.x = -Math.PI / 2;
+      refl.position.y = 0.01;
+      scene.add(refl);
+
+      // ── LAB TABLE MODEL ──
+      function makeLabTable(x, z) {
+        const group = new THREE.Group();
+        const topMat = new THREE.MeshStandardMaterial({ color: 0xf0f4f8, roughness: 0.3, metalness: 0.05 });
+        const top = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.08, 1.8), topMat);
+        top.position.y = 1.8;
+        top.castShadow = true;
+        top.receiveShadow = true;
+        group.add(top);
+
+        const edgeMat = new THREE.MeshStandardMaterial({ color: 0xc0c8d0, roughness: 0.5, metalness: 0.1 });
+        const edgeFront = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.09, 0.04), edgeMat);
+        edgeFront.position.set(0, 1.8, 0.92);
+        group.add(edgeFront);
+        const edgeBack = edgeFront.clone(); edgeBack.position.z = -0.92; group.add(edgeBack);
+
+        const cabinetMat = new THREE.MeshStandardMaterial({ color: 0x9aafbf, roughness: 0.6, metalness: 0.05 });
+        const cabinet = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.9, 1.6), cabinetMat);
+        cabinet.position.y = 1.3;
+        cabinet.castShadow = true;
+        cabinet.receiveShadow = true;
+        group.add(cabinet);
+
+        const doorMat = new THREE.MeshStandardMaterial({ color: 0xb0c4d4, roughness: 0.4, metalness: 0.08 });
+        [-0.76, 0.76].forEach(dx => {
+          const door = new THREE.Mesh(new THREE.BoxGeometry(1.38, 0.82, 0.04), doorMat);
+          door.position.set(dx, 1.3, 0.82);
+          group.add(door);
+          const handleMat = new THREE.MeshStandardMaterial({ color: 0xe0e8f0, roughness: 0.2, metalness: 0.8 });
+          const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.35, 8), handleMat);
+          handle.rotation.z = Math.PI / 2;
+          handle.position.set(dx, 1.3, 0.87);
+          group.add(handle);
+        });
+
+        const legMat = new THREE.MeshStandardMaterial({ color: 0xd0d8e0, roughness: 0.3, metalness: 0.7 });
+        [[-1.4, 0.7], [1.4, 0.7], [-1.4, -0.7], [1.4, -0.7]].forEach(([lx, lz]) => {
+          const leg = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.84, 0.07), legMat);
+          leg.position.set(lx, 0.42, lz);
+          leg.castShadow = true;
+          group.add(leg);
+          const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.05, 8), new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.9 }));
+          foot.position.set(lx, 0.025, lz);
+          group.add(foot);
+        });
+
+        const braceMat = new THREE.MeshStandardMaterial({ color: 0xc0c8d0, roughness: 0.4, metalness: 0.5 });
+        const brace = new THREE.Mesh(new THREE.BoxGeometry(2.82, 0.05, 0.05), braceMat);
+        brace.position.y = 0.6;
+        group.add(brace);
+        const brace2 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 1.36), braceMat);
+        brace2.position.y = 0.6;
+        group.add(brace2);
+
+        group.position.set(x, 0, z);
+        group.castShadow = true;
+        scene.add(group);
+        return group;
+      }
+
+      function addEquipment(tableGroup, x, z) {
+        const eqMat = new THREE.MeshStandardMaterial({ color: 0x2a3a4a, roughness: 0.4, metalness: 0.6 });
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 0.06, 12), eqMat);
+        base.position.set(x, 1.87, z);
+        scene.add(base);
+        const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.7, 8), eqMat);
+        arm.position.set(x, 2.22, z);
+        scene.add(arm);
+        const head2 = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 10), new THREE.MeshStandardMaterial({ color: 0x1a2a3a, roughness: 0.3, metalness: 0.7 }));
+        head2.position.set(x + 0.12, 2.55, z);
+        scene.add(head2);
+
+        const beakerMat = new THREE.MeshStandardMaterial({ color: 0x88c8ff, transparent: true, opacity: 0.45, roughness: 0.05 });
+        const beaker = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.22, 12), beakerMat);
+        beaker.position.set(x - 0.5, 1.95, z + 0.2);
+        scene.add(beaker);
+
+        const liquidMat = new THREE.MeshStandardMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.7, roughness: 0.1 });
+        const liquid = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.06, 0.12, 12), liquidMat);
+        liquid.position.set(x - 0.5, 1.9, z + 0.2);
+        scene.add(liquid);
+
+        const dishMat = new THREE.MeshStandardMaterial({ color: 0xeef4ff, transparent: true, opacity: 0.5, roughness: 0.1 });
+        const dish = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.03, 16), dishMat);
+        dish.position.set(x + 0.4, 1.855, z - 0.2);
+        scene.add(dish);
+      }
+
+      const tablePositions = [
+        [-15, -15], [-5, -15], [5, -15], [15, -15],
+        [-15, 0], [-5, 0], [5, 0], [15, 0],
+        [-15, 15], [-5, 15], [5, 15], [15, 15],
+      ];
+
+      tablePositions.forEach(([x, z]) => {
+        makeLabTable(x, z);
+        addEquipment(null, x, z);
+      });
+
+      const cabinetWallMat = new THREE.MeshStandardMaterial({ color: 0x9aafc0, roughness: 0.5, metalness: 0.05 });
+      [-24, -12, 0, 12, 24].forEach(x => {
+        const cab = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.2, 0.5), cabinetWallMat);
+        cab.position.set(x, 6.5, -roomD / 2 + 0.5);
+        cab.castShadow = true;
+        scene.add(cab);
+        const d = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.0, 0.06), new THREE.MeshStandardMaterial({ color: 0xb0c8d8, roughness: 0.4, metalness: 0.1 }));
+        d.position.set(x, 6.5, -roomD / 2 + 0.78);
+        scene.add(d);
+      });
+
+      // ── PLAYER ──
+      const player = new THREE.Group();
+      scene.add(player);
+
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 });
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.4, 0.4), bodyMat);
+      body.position.y = 2.1;
+      body.castShadow = true;
+      player.add(body);
+
+      const coatMat = new THREE.MeshStandardMaterial({ color: 0xeef4ff, roughness: 0.9 });
+      const coat = new THREE.Mesh(new THREE.BoxGeometry(0.72, 1.42, 0.42), coatMat);
+      coat.position.y = 2.1;
+      player.add(coat);
+
+      const headMat = new THREE.MeshStandardMaterial({ color: 0xffccaa, roughness: 0.9 });
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.6, 0.55), headMat);
+      head.position.y = 3.2;
+      head.castShadow = true;
+      player.add(head);
+
+      const legMat2 = new THREE.MeshStandardMaterial({ color: 0x334455, roughness: 0.9 });
+      const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.28, 1.0, 0.28), legMat2);
+      leftLeg.position.set(-0.2, 1.0, 0);
+      leftLeg.castShadow = true;
+      player.add(leftLeg);
+
+      const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.28, 1.0, 0.28), legMat2);
+      rightLeg.position.set(0.2, 1.0, 0);
+      rightLeg.castShadow = true;
+      player.add(rightLeg);
+
+      player.position.set(0, 0, 6);
+
+      // ── CONTROLS ──
+      const keys = {};
+      document.addEventListener("keydown", e => {
+        keys[e.code] = true;
+        if (e.code === "Digit5") {
+          firstPerson = !firstPerson;
+          modeIndicator.textContent = firstPerson ? "FIRST PERSON" : "THIRD PERSON";
+        }
+      });
+      document.addEventListener("keyup", e => keys[e.code] = false);
+
+      let firstPerson = true;
+      let walkTime = 0;
+      const half = roomW / 2 - 1;
+
+      // ── CLICK-TO-MOVE ──
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      let targetPos = null;
+      const speed = 0.15;
+
+      // Click marker
+      const markerGeo = new THREE.RingGeometry(0.2, 0.3, 32);
+      const markerMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, side: THREE.DoubleSide });
+      const clickMarker = new THREE.Mesh(markerGeo, markerMat);
+      clickMarker.rotation.x = -Math.PI / 2;
+      clickMarker.position.y = 0.05;
+      clickMarker.visible = false;
+      scene.add(clickMarker);
+
+      // Pulse ring for marker
+      const pulseGeo = new THREE.RingGeometry(0.25, 0.32, 32);
+      const pulseMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+      const pulseRing = new THREE.Mesh(pulseGeo, pulseMat);
+      pulseRing.rotation.x = -Math.PI / 2;
+      pulseRing.position.y = 0.06;
+      pulseRing.visible = false;
+      scene.add(pulseRing);
+
+      // ── FIX: Use the ACTIVE camera for raycasting ──
+      // In third-person, the camera is a top-down isometric-style view.
+      // We must always cast from the current active camera so floor intersections
+      // are calculated from the correct perspective.
+      window.addEventListener('mousedown', (event) => {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        // Always use the current camera (which may be repositioned for 3rd person)
+        raycaster.setFromCamera(mouse, camera);
+
+        // Cast against the floor
+        const intersects = raycaster.intersectObject(floor);
+
+        if (intersects.length > 0) {
+          const pt = intersects[0].point;
+
+          // Clamp within room bounds
+          const clampedX = Math.max(-half, Math.min(half, pt.x));
+          const clampedZ = Math.max(-half, Math.min(half, pt.z));
+
+          targetPos = new THREE.Vector3(clampedX, player.position.y, clampedZ);
+
+          clickMarker.position.set(clampedX, 0.05, clampedZ);
+          clickMarker.visible = true;
+          pulseRing.position.set(clampedX, 0.06, clampedZ);
+          pulseRing.visible = true;
+        }
+      });
+
+      // ── THIRD-PERSON CAMERA: Store a stable follow position ──
+      // Instead of lerping from wherever the camera is, track a dedicated
+      // "desired camera position" so it doesn't drift or jump when switching modes.
+      const tpCamOffset = new THREE.Vector3(0, 28, 18);
+      let tpCamPos = new THREE.Vector3().copy(player.position).add(tpCamOffset);
+
+      function animateLab() {
+        requestAnimationFrame(animateLab);
+
+        let walking = false;
+
+        // ── Click-to-move ──
+        if (targetPos) {
+          const dist = player.position.distanceTo(targetPos);
+          if (dist > 0.12) {
+            const dir = new THREE.Vector3().subVectors(targetPos, player.position).normalize();
+            player.position.addScaledVector(dir, speed);
+
+            // Smoothly rotate player to face movement direction
+            const targetAngle = Math.atan2(dir.x, dir.z);
+            const currentAngle = player.rotation.y;
+            // Shortest-path rotation interpolation
+            let delta = targetAngle - currentAngle;
+            while (delta > Math.PI) delta -= Math.PI * 2;
+            while (delta < -Math.PI) delta += Math.PI * 2;
+            player.rotation.y += delta * 0.15;
+
+            walking = true;
+          } else {
+            targetPos = null;
+            clickMarker.visible = false;
+            pulseRing.visible = false;
+            walking = false;
+          }
+        }
+
+        // Manual rotation keys
+        if (keys["KeyQ"]) player.rotation.y += 0.04;
+        if (keys["KeyE"]) player.rotation.y -= 0.04;
+
+        // Clamp position
+        player.position.x = Math.max(-half, Math.min(half, player.position.x));
+        player.position.z = Math.max(-half, Math.min(half, player.position.z));
+
+        // Walk animation
+        if (walking) {
+          walkTime += 0.25;
+          leftLeg.rotation.x = Math.sin(walkTime) * 0.7;
+          rightLeg.rotation.x = -Math.sin(walkTime) * 0.7;
+          body.position.y = 2.1 + Math.abs(Math.sin(walkTime * 2)) * 0.02;
+        } else {
+          leftLeg.rotation.x = 0;
+          rightLeg.rotation.x = 0;
+          body.position.y = 2.1;
+        }
+
+        // Pulse marker animation
+        if (pulseRing.visible) {
+          const t = Date.now() * 0.003;
+          pulseMat.opacity = 0.3 + Math.sin(t * 4) * 0.25;
+          const s = 1.0 + Math.sin(t * 4) * 0.15;
+          pulseRing.scale.set(s, 1, s);
+        }
+
+        // ── CAMERA UPDATE ──
+        if (firstPerson) {
+          // Eye position at head height
+          const eyePos = new THREE.Vector3(0, 3.35, 0);
+          eyePos.applyQuaternion(player.quaternion);
+          eyePos.add(player.position);
+          camera.position.copy(eyePos);
+
+          // Look forward along player's facing direction (+Z local = forward after lookAt fix)
+          // Player is rotated so its +Z faces forward in world space after our atan2 fix.
+          // We use the player quaternion to get the world-space forward direction.
+          const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(player.quaternion);
+          camera.lookAt(eyePos.clone().add(forward));
+
+        } else {
+          // Third-person: stable top-down follow cam
+          const desired = player.position.clone().add(tpCamOffset);
+          // Smooth follow
+          tpCamPos.lerp(desired, 0.08);
+          camera.position.copy(tpCamPos);
+          // Always look at the player, slightly ahead of them
+          const lookTarget = player.position.clone().add(new THREE.Vector3(0, 0, 0));
+          camera.lookAt(lookTarget);
+        }
+
+        // Subtle light flicker
+        const t = Date.now() * 0.001;
+        scene.children.forEach(child => {
+          if (child.isPointLight && child.color.b > 0.8) {
+            child.intensity = 0.8 + Math.sin(t * 60 + child.position.x) * 0.01;
+          }
+        });
+
+        renderer.render(scene, camera);
+      }
+      animateLab();
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+
+    window.addEventListener("resize", () => {
+      entryCamera.aspect = window.innerWidth / window.innerHeight;
+      entryCamera.updateProjectionMatrix();
+      entryRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
 </body>
+
 </html>
