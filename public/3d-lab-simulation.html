@@ -140,33 +140,69 @@
 
     #hud {
       position: absolute;
-      bottom: 24px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       display: none;
       font-family: 'Share Tech Mono', monospace;
       color: #00e5ffbb;
-      font-size: 12px;
-      letter-spacing: 2px;
-      background: #00000088;
-      backdrop-filter: blur(10px);
-      padding: 10px 24px;
-      border-radius: 40px;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      background: #00000099;
+      backdrop-filter: blur(14px);
+      padding: 12px 20px;
+      border-radius: 12px;
       border: 1px solid #00e5ff22;
       z-index: 10;
       text-align: center;
     }
 
-    #hud span {
-      margin: 0 12px;
+    #hud .hud-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #00e5ff55;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    #hud .hud-grid {
+      display: grid;
+      grid-template-columns: repeat(5, auto);
+      gap: 6px 18px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #hud .hud-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
     }
 
     #hud .key {
+      background: #00e5ff18;
+      border: 1px solid #00e5ff55;
+      padding: 3px 9px;
+      border-radius: 5px;
+      font-size: 10px;
+      color: #00e5ff;
+      white-space: nowrap;
+      letter-spacing: 1px;
+    }
+
+    #hud .hud-action {
+      font-size: 9px;
+      color: #ffffff77;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    #hud .hud-divider {
+      width: 1px;
+      height: 32px;
       background: #00e5ff22;
-      border: 1px solid #00e5ff44;
-      padding: 2px 7px;
-      border-radius: 3px;
-      font-size: 11px;
+      margin: 0 2px;
     }
 
     #modeIndicator {
@@ -623,11 +659,33 @@
     <button class="btn btn-primary" id="skipBtn"><span>Skip → Enter Lab</span></button>
   </div>
   <div id="hud">
-    <span><span class="key">Click Floor</span> Move</span>
-    <span><span class="key">Q / E</span> Turn</span>
-    <span><span class="key">5</span> Toggle View</span>
-    <span><span class="key">Click Label</span> Inspect Drug</span>
-    <span><span class="key">Click Board</span> Patient Chart</span>
+    <div class="hud-label">Controls</div>
+    <div class="hud-grid">
+      <div class="hud-item">
+        <span class="key">Click Floor</span>
+        <span class="hud-action">Move</span>
+      </div>
+      <div class="hud-divider"></div>
+      <div class="hud-item">
+        <span class="key">Q / E</span>
+        <span class="hud-action">Turn</span>
+      </div>
+      <div class="hud-divider"></div>
+      <div class="hud-item">
+        <span class="key">5</span>
+        <span class="hud-action">Toggle View</span>
+      </div>
+      <div class="hud-divider"></div>
+      <div class="hud-item">
+        <span class="key">Click Label</span>
+        <span class="hud-action">Inspect Drug</span>
+      </div>
+      <div class="hud-divider"></div>
+      <div class="hud-item">
+        <span class="key">Click Board</span>
+        <span class="hud-action">Patient Chart</span>
+      </div>
+    </div>
   </div>
   <div id="modeIndicator">FIRST PERSON</div>
 
@@ -1683,14 +1741,84 @@
         return el;
       })();
 
-      // Glowing floor marker near door (so player can see where to walk)
-      (function addDoorMarker() {
-        const mat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: .18, side: THREE.DoubleSide });
-        const ring = new THREE.Mesh(new THREE.RingGeometry(1.2, 2.0, 48), mat);
-        ring.rotation.x = -Math.PI / 2; ring.position.set(0, .02, 23); scene.add(ring);
-        const inner = new THREE.Mesh(new THREE.CircleGeometry(1.1, 48), new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: .07, side: THREE.DoubleSide }));
-        inner.rotation.x = -Math.PI / 2; inner.position.set(0, .01, 23); scene.add(inner);
+      // ── DOOR ZONE: large glowing floor area centred on exit door ──
+      // Door sits at z≈+26 (hd=26), width 4.2, centred x=0
+      // We paint a generous 8×6 floor zone so the user has a big target to click
+      const DOOR_ZONE = { cx: 0, cz: 23, hw: 4.5, hd_zone: 4.0, triggerZ: 22.5 };
+
+      (function buildDoorZone() {
+        // Outer glow rectangle
+        const outerGeo = new THREE.PlaneGeometry(DOOR_ZONE.hw * 2, DOOR_ZONE.hd_zone * 2);
+        const outerMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: .07, side: THREE.DoubleSide });
+        const outer = new THREE.Mesh(outerGeo, outerMat);
+        outer.rotation.x = -Math.PI / 2;
+        outer.position.set(DOOR_ZONE.cx, .01, DOOR_ZONE.cz);
+        outer.userData.isDoorZone = true;
+        scene.add(outer);
+
+        // Animated inner carpet glow (slightly brighter)
+        const innerMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: .13, side: THREE.DoubleSide });
+        const inner = new THREE.Mesh(new THREE.PlaneGeometry(DOOR_ZONE.hw * 2 - 1, DOOR_ZONE.hd_zone * 2 - 1), innerMat);
+        inner.rotation.x = -Math.PI / 2;
+        inner.position.set(DOOR_ZONE.cx, .02, DOOR_ZONE.cz);
+        inner.userData.isDoorZone = true;
+        scene.add(inner);
+
+        // Bright outer ring tracing the perimeter
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: .55, side: THREE.DoubleSide });
+        // Build ring as a frame of 4 thin quads
+        const thickness = .12;
+        const hw2 = DOOR_ZONE.hw, hd2 = DOOR_ZONE.hd_zone;
+        [
+          // top, bottom, left, right
+          { w: hw2 * 2, h: thickness, x: 0, z: -hd2 + thickness / 2 },
+          { w: hw2 * 2, h: thickness, x: 0, z: hd2 - thickness / 2 },
+          { w: thickness, h: hd2 * 2, x: -hw2 + thickness / 2, z: 0 },
+          { w: thickness, h: hd2 * 2, x: hw2 - thickness / 2, z: 0 },
+        ].forEach(seg => {
+          const sm = new THREE.Mesh(new THREE.PlaneGeometry(seg.w, seg.h), ringMat);
+          sm.rotation.x = -Math.PI / 2;
+          sm.position.set(DOOR_ZONE.cx + seg.x, .03, DOOR_ZONE.cz + seg.z);
+          scene.add(sm);
+        });
+
+        // Animated pulse ring at door centre
+        const pulseRingMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: .4, side: THREE.DoubleSide });
+        const pulseR = new THREE.Mesh(new THREE.RingGeometry(1.5, 2.1, 48), pulseRingMat);
+        pulseR.rotation.x = -Math.PI / 2;
+        pulseR.position.set(DOOR_ZONE.cx, .04, DOOR_ZONE.cz + 1.5);
+        pulseR.userData.isDoorPulse = true;
+        scene.add(pulseR);
+
+        // Arrow chevrons pointing toward door
+        for (let i = 0; i < 3; i++) {
+          const arrowMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: .25 - i * .06, side: THREE.DoubleSide });
+          const arrow = new THREE.Mesh(new THREE.PlaneGeometry(.6, .3), arrowMat);
+          arrow.rotation.x = -Math.PI / 2;
+          arrow.position.set(DOOR_ZONE.cx, .04, DOOR_ZONE.cz - 1.5 + i * .7);
+          scene.add(arrow);
+        }
+
+        // "DOOR" text sign above doorway (already exists as exitS — just add door-zone light)
+        const doorAreaLight = new THREE.PointLight(0x00ff88, .4, 9);
+        doorAreaLight.position.set(DOOR_ZONE.cx, 1.5, DOOR_ZONE.cz + 2);
+        doorAreaLight.userData.isDoorGlow = true;
+        scene.add(doorAreaLight);
+
+        // Store refs for animation
+        scene.userData.doorPulseRing = pulseR;
+        scene.userData.doorInnerMat = innerMat;
+        scene.userData.outerMat = outerMat;
       })();
+
+      // Invisible clickable floor plane covering door zone (used for raycasting)
+      const doorZonePlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(DOOR_ZONE.hw * 2 + 1, DOOR_ZONE.hd_zone * 2 + 1),
+        new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide })
+      );
+      doorZonePlane.rotation.x = -Math.PI / 2;
+      doorZonePlane.position.set(DOOR_ZONE.cx, .005, DOOR_ZONE.cz);
+      scene.add(doorZonePlane);
 
       // Click marker
       const cm = new THREE.Mesh(new THREE.RingGeometry(.2, .3, 32), new THREE.MeshBasicMaterial({ color: 0x00ff88, side: THREE.DoubleSide }));
@@ -1767,6 +1895,17 @@
         if (bhits.length > 0) { showPatientChart(); return; }
         dp.style.display = "none"; currentDrug = null;
         pp2.style.display = "none";
+
+        // ── Check door zone FIRST — if clicked anywhere inside, route player to door ──
+        const dzHits = ray.intersectObject(doorZonePlane);
+        if (dzHits.length > 0) {
+          // Send player to just in front of the door — they'll walk through naturally
+          tgt = new THREE.Vector3(DOOR_ZONE.cx, player.position.y, DOOR_ZONE.cz + 1.8);
+          cm.position.set(DOOR_ZONE.cx, .05, DOOR_ZONE.cz + 1.8);
+          cm.visible = true; pr.position.copy(cm.position); pr.visible = true;
+          return;
+        }
+
         const fhits = ray.intersectObject(floor);
         if (fhits.length > 0) {
           const pt = fhits[0].point;
@@ -1784,8 +1923,10 @@
         ray.setFromCamera(mo, camera);
         const h = ray.intersectObjects(labelMeshes);
         const bh = ray.intersectObjects(clickableBoards);
+        const dz = ray.intersectObject(doorZonePlane);
         if (h.length > 0) { labCanvas.style.cursor = "pointer"; hoveredLabel = h[0].object; }
         else if (bh.length > 0) { labCanvas.style.cursor = "pointer"; hoveredLabel = null; }
+        else if (dz.length > 0) { labCanvas.style.cursor = "cell"; hoveredLabel = null; }
         else { labCanvas.style.cursor = "default"; hoveredLabel = null; }
       });
 
@@ -1809,12 +1950,25 @@
         player.position.x = Math.max(-half, Math.min(half, player.position.x));
         player.position.z = Math.max(-half, Math.min(half, player.position.z));
 
-        // ── DOOR TRANSITION CHECK (front wall, z ≈ +26, door centred at x=0) ──
-        const nearDoor = player.position.z > 20 && Math.abs(player.position.x) < 3.5;
-        dpEl.style.display = (nearDoor && portalArmed) ? 'block' : 'none';
-        if (nearDoor && player.position.z > 23 && portalArmed) {
-          portalArmed = false;   // prevent double-fire
+        // ── DOOR TRANSITION CHECK ──────────────────────────────────────────
+        // Show prompt whenever player is anywhere in the generous approach zone
+        const dz_dist_x = Math.abs(player.position.x - DOOR_ZONE.cx);
+        const dz_dist_z = DOOR_ZONE.cz - player.position.z;   // positive = player south of zone
+        const inApproachZone = dz_dist_z < 8 && dz_dist_z > -2 && dz_dist_x < DOOR_ZONE.hw + 2;
+        const inTriggerZone = player.position.z > DOOR_ZONE.triggerZ && dz_dist_x < DOOR_ZONE.hw;
+        dpEl.style.display = (inApproachZone && portalArmed) ? 'block' : 'none';
+        if (inTriggerZone && portalArmed) {
+          portalArmed = false;
           window.parent.postMessage({ type: 'SCENE_TRANSITION', from: 'lab' }, '*');
+        }
+        // Animate door zone pulse ring
+        if (scene.userData.doorPulseRing) {
+          const _dt = Date.now() * .0015;
+          scene.userData.doorPulseRing.material.opacity = .28 + Math.sin(_dt * 3) * .18;
+          const _ps = 1 + Math.sin(_dt * 2.2) * .12;
+          scene.userData.doorPulseRing.scale.set(_ps, 1, _ps);
+          if (scene.userData.doorInnerMat)
+            scene.userData.doorInnerMat.opacity = .10 + Math.sin(_dt * 2) * .05;
         }
         if (walk) { wt += .25; lLeg.rotation.x = Math.sin(wt) * .7; rLeg.rotation.x = -Math.sin(wt) * .7; body.position.y = 2.1 + Math.abs(Math.sin(wt * 2)) * .02; }
         else { lLeg.rotation.x = 0; rLeg.rotation.x = 0; body.position.y = 2.1; }
