@@ -738,13 +738,13 @@
         const frameTop = new THREE.Mesh(new THREE.BoxGeometry(doorW + 0.28, 0.14, 0.22), frameM);
         frameTop.position.set(0, doorH, hd); scene.add(frameTop);
 
-        // Door (slightly ajar, teal-glowing)
+        // Door (closed, flush in frame)
         const doorPanel = new THREE.Mesh(new THREE.BoxGeometry(2.1, doorH - 0.1, 0.07), new THREE.MeshStandardMaterial({ color: 0x8a8070, roughness: 0.5, metalness: 0.1 }));
-        doorPanel.position.set(-0.35, doorH / 2 - 0.05, hd - 0.08); doorPanel.rotation.y = 0.22; scene.add(doorPanel);
+        doorPanel.position.set(0, doorH / 2 - 0.05, hd); doorPanel.rotation.y = 0; scene.add(doorPanel);
         // Door handle
         const handleM = new THREE.MeshStandardMaterial({ color: 0xb8aa88, roughness: 0.2, metalness: 0.9 });
         const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.35, 8), handleM);
-        handle.rotation.z = Math.PI / 2; handle.position.set(-0.95, doorH / 2 - 0.2, hd - 0.04); scene.add(handle);
+        handle.rotation.z = Math.PI / 2; handle.position.set(-0.7, doorH / 2 - 0.2, hd + 0.05); scene.add(handle);
 
         // Door sign: "Room 204"
         function makeDoorSignTex() {
@@ -756,7 +756,7 @@
             return new THREE.CanvasTexture(c);
         }
         const doorSign = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.28), new THREE.MeshBasicMaterial({ map: makeDoorSignTex(), side: THREE.DoubleSide }));
-        doorSign.rotation.y = Math.PI; doorSign.position.set(1.2, doorH - 0.6, hd - 0.02); scene.add(doorSign);
+        doorSign.rotation.y = 0; doorSign.position.set(1.2, doorH - 0.6, hd + 0.05); scene.add(doorSign);
 
         // ── DOOR PORTAL ZONE ─────────────────────────────────────────────────────────
         const DOOR_ZONE = { cx: 0, cz: hd - 0.8, hw: 1.3, hd_zone: 2.0, triggerZ: hd - 1.8 };

@@ -975,19 +975,16 @@
     function animEntry() { if (!eRun) return; requestAnimationFrame(animEntry); const t = Date.now() * .001; eScene.children.forEach(o => { if (o.userData.axis) o.rotateOnAxis(o.userData.axis, o.userData.speed); }); eCam.position.x = Math.sin(t * .1) * 2; eCam.position.y = Math.cos(t * .07); eCam.lookAt(0, 0, 0); eRend.render(eScene, eCam); }
     animEntry();
 
-    document.getElementById("playBtn").onclick = () => { menu.style.display = "none"; labOptions.style.display = "block"; };
+    document.getElementById("playBtn").onclick = () => { menu.style.display = "none"; labOptions.style.display = "none"; eRun = false; startLab(); };
     document.getElementById("notesBtn").onclick = () => { const n = prompt("Insert clinical notes:"); if (n) alert("Saved."); };
     const fi = document.getElementById("fileInput");
     document.getElementById("filesBtn").onclick = () => fi.click();
     fi.onchange = () => { labOptions.style.display = "none"; eRun = false; startLab(); };
     document.getElementById("skipBtn").onclick = () => { labOptions.style.display = "none"; eRun = false; startLab(); };
 
-    // ── PORTAL AUTO-START: skip menu when running inside portal.html ──
-    if (window.__PORTAL_MODE__) {
-      menu.style.display = "none"; labOptions.style.display = "none"; eRun = false;
-      // slight delay so renderer has correct canvas size after iframe becomes z-visible
-      setTimeout(startLab, 120);
-    }
+    // ── ALWAYS AUTO-START: skip all intro screens ──
+    menu.style.display = "none"; labOptions.style.display = "none"; eRun = false;
+    setTimeout(startLab, 120);
 
     // ─── TEXTURE HELPERS (from 3d-lab-simulation) ──────────────────
     function mkCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; }
@@ -1172,6 +1169,223 @@
       return new THREE.CanvasTexture(c);
     }
 
+    function makeMonitoringBillTex() {
+      const W = 1600, H = 700, c = document.createElement('canvas'); c.width = W; c.height = H;
+      const x = c.getContext('2d');
+
+      // ── Deep warm background with subtle radial vignette ──
+      x.fillStyle = '#080608'; x.fillRect(0, 0, W, H);
+      const vg = x.createRadialGradient(W / 2, H / 2, 80, W / 2, H / 2, W * .72);
+      vg.addColorStop(0, '#1a0e04'); vg.addColorStop(1, '#050305');
+      x.fillStyle = vg; x.fillRect(0, 0, W, H);
+
+      // ── Hex grid background ──
+      const hSize = 28, hH = hSize * Math.sqrt(3);
+      x.strokeStyle = '#ffb30010'; x.lineWidth = 1;
+      for (let row = -1; row < H / hH + 2; row++) {
+        for (let col = -1; col < W / (hSize * 3) + 2; col++) {
+          const ox = col * hSize * 3 + (row % 2) * hSize * 1.5;
+          const oy = row * hH;
+          x.beginPath();
+          for (let i = 0; i < 6; i++) {
+            const angle = Math.PI / 180 * (60 * i - 30);
+            const px = ox + hSize * Math.cos(angle), py = oy + hSize * Math.sin(angle);
+            i === 0 ? x.moveTo(px, py) : x.lineTo(px, py);
+          }
+          x.closePath(); x.stroke();
+        }
+      }
+
+      // ── Amber border with cut corners (octagonal feel) ──
+      const cut = 22;
+      x.beginPath();
+      x.moveTo(cut, 4); x.lineTo(W - cut, 4);
+      x.lineTo(W - 4, cut); x.lineTo(W - 4, H - cut);
+      x.lineTo(W - cut, H - 4); x.lineTo(cut, H - 4);
+      x.lineTo(4, H - cut); x.lineTo(4, cut); x.closePath();
+      const borderG = x.createLinearGradient(0, 0, W, H);
+      borderG.addColorStop(0, '#ffb300'); borderG.addColorStop(.5, '#ff6b00'); borderG.addColorStop(1, '#ffb300');
+      x.strokeStyle = borderG; x.lineWidth = 3.5; x.stroke();
+      x.globalAlpha = .12; x.fillStyle = '#ff8800'; x.fill(); x.globalAlpha = 1;
+
+      // Inner thin border
+      x.beginPath();
+      x.moveTo(cut + 8, 13); x.lineTo(W - cut - 8, 13);
+      x.lineTo(W - 13, cut + 8); x.lineTo(W - 13, H - cut - 8);
+      x.lineTo(W - cut - 8, H - 13); x.lineTo(cut + 8, H - 13);
+      x.lineTo(13, H - cut - 8); x.lineTo(13, cut + 8); x.closePath();
+      x.strokeStyle = '#ffb30033'; x.lineWidth = 1; x.stroke();
+
+      // ── Header bar with diagonal slice ──
+      x.save();
+      x.beginPath(); x.moveTo(20, 20); x.lineTo(W - 20, 20); x.lineTo(W - 20, 88); x.lineTo(W * .55, 88); x.lineTo(W * .48, 58); x.lineTo(20, 58); x.closePath();
+      x.fillStyle = '#ff880018'; x.fill();
+      x.strokeStyle = '#ffb30044'; x.lineWidth = 1; x.stroke();
+      x.restore();
+
+      // Title
+      x.fillStyle = '#ffb300'; x.font = 'bold 36px monospace'; x.textAlign = 'left';
+      x.fillText('T2DM', 38, 54);
+      x.fillStyle = '#ff6b00'; x.font = 'bold 36px monospace';
+      x.fillText(' CLINICAL TARGETS', 108, 54);
+      x.fillStyle = '#ffffff33'; x.font = '11px monospace'; x.textAlign = 'left';
+      x.fillText('MONITORING PROTOCOL  ·  ADA STANDARDS 2024  ·  ANNUAL REVIEW REQUIRED', 38, 76);
+
+      // Diagonal separator line
+      x.beginPath(); x.moveTo(20, 96); x.lineTo(W - 20, 96);
+      x.strokeStyle = '#ffb30030'; x.lineWidth = 1; x.stroke();
+
+      // ── Central circular HbA1c gauge ──
+      const cx = W / 2, cy = H / 2 + 30, R = 130;
+      // Outer ring glow
+      x.save();
+      x.shadowColor = '#ffb300'; x.shadowBlur = 28;
+      x.beginPath(); x.arc(cx, cy, R + 8, 0, Math.PI * 2);
+      x.strokeStyle = '#ffb30022'; x.lineWidth = 16; x.stroke();
+      x.restore();
+      // Track arc (full circle, dim)
+      x.beginPath(); x.arc(cx, cy, R, -Math.PI * .75, Math.PI * 1.25);
+      x.strokeStyle = '#ffffff0e'; x.lineWidth = 14; x.stroke();
+      // Progress arc — HbA1c 9.2 → target 7.0 shown as partial fill
+      const startA = -Math.PI * .75, endA = startA + Math.PI * 2 * .58;
+      const arcG = x.createConicGradient ? x.createConicGradient(startA, cx, cy) : null;
+      x.beginPath(); x.arc(cx, cy, R, startA, endA);
+      x.strokeStyle = '#ff6b00'; x.lineWidth = 14;
+      x.save(); x.shadowColor = '#ff8800'; x.shadowBlur = 18; x.stroke(); x.restore();
+      // Progress end cap dot
+      x.beginPath(); x.arc(cx + R * Math.cos(endA), cy + R * Math.sin(endA), 8, 0, Math.PI * 2);
+      x.fillStyle = '#ffb300'; x.fill();
+      // Tick marks around gauge
+      for (let t = 0; t < 12; t++) {
+        const ta = startA + (Math.PI * 2) * (t / 11);
+        const inner = t % 3 === 0 ? R - 22 : R - 14;
+        x.beginPath();
+        x.moveTo(cx + (R + 16) * Math.cos(ta), cy + (R + 16) * Math.sin(ta));
+        x.lineTo(cx + inner * Math.cos(ta), cy + inner * Math.sin(ta));
+        x.strokeStyle = t % 3 === 0 ? '#ffb30077' : '#ffb30033'; x.lineWidth = t % 3 === 0 ? 2 : 1; x.stroke();
+      }
+      // Center label
+      x.fillStyle = '#ffb300'; x.font = 'bold 48px monospace'; x.textAlign = 'center';
+      x.fillText('7.0', cx, cy + 14);
+      x.fillStyle = '#ff880099'; x.font = 'bold 14px monospace';
+      x.fillText('%', cx + 46, cy + 10);
+      x.fillStyle = '#ffffff55'; x.font = '11px monospace';
+      x.fillText('HbA1c TARGET', cx, cy + 38);
+      x.fillStyle = '#ffffff22'; x.font = '10px monospace';
+      x.fillText('CURRENT: 9.2%', cx, cy + 56);
+      // "GOAL" label below arc
+      x.fillStyle = '#ffb30066'; x.font = '10px monospace';
+      x.fillText('< 7.0%  ADA GOAL', cx, cy + R + 32);
+
+      // ── Concentric dashed rings (decorative) ──
+      [R * 1.35, R * 1.65].forEach((r, ri) => {
+        x.save(); x.setLineDash([4, 12]);
+        x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2);
+        x.strokeStyle = ri === 0 ? '#ffb30018' : '#ffb30010'; x.lineWidth = 1; x.stroke();
+        x.restore();
+      });
+
+      // ── Metric cards — left column ──
+      const leftCards = [
+        { label: 'FASTING BG', val: '80–130', unit: 'mg/dL', pct: .62, color: '#ffb300' },
+        { label: 'POST-MEAL BG', val: '< 180', unit: 'mg/dL', pct: .48, color: '#ff8c00' },
+        { label: 'BP TARGET', val: '130/80', unit: 'mmHg', pct: .70, color: '#ff6b00' },
+      ];
+      leftCards.forEach((card, i) => {
+        const cardX = 26, cardY = 116 + i * 178, cardW = 290, cardH = 156;
+        // Card bg with diagonal clip feel
+        x.save();
+        x.beginPath();
+        x.moveTo(cardX, cardY); x.lineTo(cardX + cardW - 16, cardY);
+        x.lineTo(cardX + cardW, cardY + 16); x.lineTo(cardX + cardW, cardY + cardH);
+        x.lineTo(cardX + 16, cardY + cardH); x.lineTo(cardX, cardY + cardH - 16); x.closePath();
+        x.fillStyle = card.color + '0d'; x.fill();
+        x.strokeStyle = card.color + '44'; x.lineWidth = 1; x.stroke();
+        x.restore();
+        // Accent corner marks
+        [[cardX, cardY + 12, 'h'], [cardX, cardY, 'v'], [cardX + cardW - 12, cardY, 'h'], [cardX + cardW, cardY + 12, 'v']].forEach(([px, py, dir]) => {
+          x.beginPath();
+          if (dir === 'h') { x.moveTo(px, py); x.lineTo(px + 10, py); } else { x.moveTo(px, py); x.lineTo(px, py + 10); }
+          x.strokeStyle = card.color + '99'; x.lineWidth = 2; x.stroke();
+        });
+        // Label
+        x.fillStyle = card.color + 'aa'; x.font = 'bold 11px monospace'; x.textAlign = 'left';
+        x.fillText(card.label, cardX + 14, cardY + 28);
+        // Value
+        x.fillStyle = '#fff8e8'; x.font = 'bold 34px monospace';
+        x.fillText(card.val, cardX + 14, cardY + 76);
+        x.fillStyle = card.color + '88'; x.font = '12px monospace';
+        x.fillText(card.unit, cardX + 14, cardY + 98);
+        // Mini progress bar
+        const bx = cardX + 14, by = cardY + 118, bw = cardW - 28, bh = 8;
+        x.fillStyle = '#ffffff0a'; x.fillRect(bx, by, bw, bh);
+        const barG = x.createLinearGradient(bx, by, bx + bw * card.pct, by);
+        barG.addColorStop(0, card.color + 'aa'); barG.addColorStop(1, card.color);
+        x.fillStyle = barG; x.fillRect(bx, by, bw * card.pct, bh);
+        x.strokeStyle = card.color + '33'; x.lineWidth = 1; x.strokeRect(bx, by, bw, bh);
+      });
+
+      // ── Metric cards — right column ──
+      const rightCards = [
+        { label: 'LDL CHOLESTEROL', val: '< 70', unit: 'mg/dL (high risk)', pct: .55, color: '#ff9500' },
+        { label: 'eGFR MONITORING', val: '≥ 60', unit: 'mL/min/1.73m²', pct: .78, color: '#ffb300' },
+        { label: 'UACR TARGET', val: '< 30', unit: 'mg/g  creatinine', pct: .40, color: '#ffd000' },
+      ];
+      const rcX = W - 316;
+      rightCards.forEach((card, i) => {
+        const cardX = rcX, cardY = 116 + i * 178, cardW = 290, cardH = 156;
+        x.save();
+        x.beginPath();
+        x.moveTo(cardX + 16, cardY); x.lineTo(cardX + cardW, cardY);
+        x.lineTo(cardX + cardW, cardY + cardH - 16); x.lineTo(cardX + cardW - 16, cardY + cardH);
+        x.lineTo(cardX, cardY + cardH); x.lineTo(cardX, cardY + 16); x.closePath();
+        x.fillStyle = card.color + '0d'; x.fill();
+        x.strokeStyle = card.color + '44'; x.lineWidth = 1; x.stroke();
+        x.restore();
+        [[cardX + cardW - 10, cardY, 'h'], [cardX + cardW, cardY, 'v'], [cardX, cardY + cardH - 10, 'v'], [cardX + 10, cardY + cardH, 'h']].forEach(([px, py, dir]) => {
+          x.beginPath();
+          if (dir === 'h') { x.moveTo(px, py); x.lineTo(px + 10, py); } else { x.moveTo(px, py); x.lineTo(px, py + 10); }
+          x.strokeStyle = card.color + '99'; x.lineWidth = 2; x.stroke();
+        });
+        x.fillStyle = card.color + 'aa'; x.font = 'bold 11px monospace'; x.textAlign = 'left';
+        x.fillText(card.label, cardX + 14, cardY + 28);
+        x.fillStyle = '#fff8e8'; x.font = 'bold 34px monospace';
+        x.fillText(card.val, cardX + 14, cardY + 76);
+        x.fillStyle = card.color + '88'; x.font = '12px monospace';
+        x.fillText(card.unit, cardX + 14, cardY + 98);
+        const bx = cardX + 14, by = cardY + 118, bw = cardW - 28, bh = 8;
+        x.fillStyle = '#ffffff0a'; x.fillRect(bx, by, bw, bh);
+        const barG = x.createLinearGradient(bx, by, bx + bw * card.pct, by);
+        barG.addColorStop(0, card.color + 'aa'); barG.addColorStop(1, card.color);
+        x.fillStyle = barG; x.fillRect(bx, by, bw * card.pct, bh);
+        x.strokeStyle = card.color + '33'; x.lineWidth = 1; x.strokeRect(bx, by, bw, bh);
+      });
+
+      // ── Small info pills at the bottom ──
+      const pills = ['STATIN  Hi-intensity', 'ACEi if UACR ≥30', 'Eye exam  Annual', 'Foot exam  Annual', 'Smoking  Cessation'];
+      pills.forEach((pill, i) => {
+        const px = 320 + i * 192, py = H - 50, pw = 178, ph = 32;
+        x.beginPath(); x.roundRect ? x.roundRect(px, py, pw, ph, 6) : (x.rect(px, py, pw, ph));
+        x.fillStyle = '#ffb30010'; x.fill();
+        x.strokeStyle = '#ffb30033'; x.lineWidth = 1; x.stroke();
+        x.fillStyle = '#ffcc6699'; x.font = 'bold 11px monospace'; x.textAlign = 'center';
+        const [lbl, val] = pill.split('  ');
+        x.fillText(lbl, px + pw / 2, py + 14);
+        x.fillStyle = '#fff8e866'; x.font = '10px monospace';
+        x.fillText(val, px + pw / 2, py + 28);
+      });
+
+      // ── Diagonal scan-line overlay (subtle) ──
+      x.save(); x.globalAlpha = .018;
+      for (let sy = 0; sy < H; sy += 3) {
+        x.beginPath(); x.moveTo(0, sy); x.lineTo(W, sy);
+        x.strokeStyle = '#ffffff'; x.lineWidth = 1; x.stroke();
+      }
+      x.restore();
+
+      return new THREE.CanvasTexture(c);
+    }
+
     function makeBillTex() {
       const W = 1280, H = 800, c = document.createElement('canvas'); c.width = W; c.height = H;
       const x = c.getContext('2d');
@@ -1282,6 +1496,11 @@
       x.globalAlpha = 1;
       return new THREE.CanvasTexture(c);
     }
+
+    // ── Tracks which billboard image was shown last so we never repeat ──
+    let _lastBillImg = -1;
+
+
 
     // ─── MAIN LAB ──────────────────────────────────────────────────
     function startLab() {
@@ -1701,12 +1920,179 @@
       const bgs2 = new THREE.Mesh(new THREE.BoxGeometry(9.8, .08, .08), new THREE.MeshBasicMaterial({ color: 0xff8844, transparent: true, opacity: .6 }));
       bgs2.position.set(bb2x, 6.7, RD / 2 - 1.66); scene.add(bgs2);
 
-      // ── PLAYER ──
+      // ── BILLBOARD 3: T2DM Monitoring Targets — WALL-MOUNTED PANEL (back wall) ──
+      // Different from bills 1&2: no posts, sleek wall-mount with L-brackets + amber underglow
+      const bb3x = 0;
+      const bb3z = -RD / 2 + 1.6;
+      const bbMountMat = new THREE.MeshStandardMaterial({ color: 0x1a0e04, roughness: .35, metalness: .85 });
+      const bbAccentMat = new THREE.MeshStandardMaterial({ color: 0xffb300, roughness: .2, metalness: .9, emissive: new THREE.Color(0xff8800), emissiveIntensity: .45 });
+
+      // Wide backing slab — recessed into the wall slightly
+      const backing3 = new THREE.Mesh(new THREE.BoxGeometry(14.2, 5.8, .18), new THREE.MeshStandardMaterial({ color: 0x0c0604, roughness: .9, metalness: .1 }));
+      backing3.position.set(bb3x, 4.4, bb3z + .06); scene.add(backing3);
+
+      // Thin reveal border around backing (4 strips)
+      const revealMat = new THREE.MeshStandardMaterial({ color: 0xffb300, roughness: .15, metalness: .95, emissive: new THREE.Color(0xff7700), emissiveIntensity: .3 });
+      [// [w, h, d, ox, oy, oz]
+        [14.4, .08, .06, 0, 2.97, .22],  // top
+        [14.4, .08, .06, 0, -2.97, .22],  // bottom
+        [.08, 5.9, .06, -7.12, 0, .22],   // left
+        [.08, 5.9, .06, 7.12, 0, .22],   // right
+      ].forEach(([w, h, d, ox, oy, oz]) => {
+        const r = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), revealMat);
+        r.position.set(bb3x + ox, 4.4 + oy, bb3z + oz); scene.add(r);
+      });
+
+      // Corner L-bracket mounts (4 corners)
+      const bracketMat = new THREE.MeshStandardMaterial({ color: 0x2a1a08, roughness: .3, metalness: .8 });
+      [[-6.6, 2.65], [6.6, 2.65], [-6.6, -2.65], [6.6, -2.65]].forEach(([bx, by]) => {
+        const arm1 = new THREE.Mesh(new THREE.BoxGeometry(.55, .12, .45), bracketMat);
+        arm1.position.set(bb3x + bx, 4.4 + by, bb3z + .3); scene.add(arm1);
+        const arm2 = new THREE.Mesh(new THREE.BoxGeometry(.12, .55, .45), bracketMat);
+        arm2.position.set(bb3x + bx, 4.4 + by, bb3z + .3); scene.add(arm2);
+        // Corner accent dot
+        const dot = new THREE.Mesh(new THREE.CylinderGeometry(.045, .045, .06, 8), bbAccentMat);
+        dot.rotation.x = Math.PI / 2;
+        dot.position.set(bb3x + bx, 4.4 + by, bb3z + .36); scene.add(dot);
+      });
+
+      // Wall anchor bolts (6 bolts across top and bottom)
+      [-5, -2.5, 0, 2.5, 5].forEach((bx2) => {
+        [2.72, -2.72].forEach(by2 => {
+          const bolt = new THREE.Mesh(new THREE.CylinderGeometry(.028, .028, .08, 6), bbMountMat);
+          bolt.rotation.x = Math.PI / 2;
+          bolt.position.set(bb3x + bx2, 4.4 + by2, bb3z + .22); scene.add(bolt);
+        });
+      });
+
+      // Amber placeholder shown while the image loads
+      const bill3Mat = new THREE.MeshBasicMaterial({ color: 0x332200, side: THREE.DoubleSide });
+      const bill3 = new THREE.Mesh(new THREE.PlaneGeometry(13.8, 5.4), bill3Mat);
+      bill3.position.set(bb3x, 4.4, bb3z + .17);
+      scene.add(bill3);
+
+      // Named reusable function — called on first load AND every time player re-enters
+      function refreshBillboardImage() {
+        let idx;
+        do { idx = Math.floor(Math.random() * 5) + 1; } while (idx === _lastBillImg);
+        _lastBillImg = idx;
+        const imgPath = 'pics/' + idx + '.png';
+        const img = new Image();
+        img.onload = function () {
+          const tex = new THREE.Texture(img);
+          tex.needsUpdate = true;
+          bill3Mat.map = tex;
+          bill3Mat.color.set(0xffffff);
+          bill3Mat.needsUpdate = true;
+        };
+        img.onerror = function () {
+          console.warn('Billboard image failed to load: ' + imgPath);
+          const ec = document.createElement('canvas'); ec.width = 512; ec.height = 256;
+          const ex = ec.getContext('2d');
+          ex.fillStyle = '#1a0500'; ex.fillRect(0, 0, 512, 256);
+          ex.strokeStyle = '#ff4400'; ex.lineWidth = 4; ex.strokeRect(4, 4, 504, 248);
+          ex.fillStyle = '#ff6600'; ex.font = 'bold 28px monospace'; ex.textAlign = 'center';
+          ex.fillText('IMAGE NOT FOUND', 256, 110);
+          ex.fillStyle = '#ff440099'; ex.font = '18px monospace';
+          ex.fillText(imgPath, 256, 148);
+          bill3Mat.map = new THREE.CanvasTexture(ec);
+          bill3Mat.color.set(0xffffff);
+          bill3Mat.needsUpdate = true;
+        };
+        img.src = imgPath;
+      }
+
+      // Load image on first entry
+      refreshBillboardImage();
+
+      // Amber underglow — two long light tubes at the bottom edge
+      const glowTubeMat = new THREE.MeshBasicMaterial({ color: 0xff8800, transparent: true, opacity: .75 });
+      const glowTube = new THREE.Mesh(new THREE.BoxGeometry(13.6, .06, .06), glowTubeMat);
+      glowTube.position.set(bb3x, 1.72, bb3z + .24); scene.add(glowTube);
+      // Glow strip reflection on floor
+      const floorGlow = new THREE.Mesh(new THREE.PlaneGeometry(13.6, 1.2), new THREE.MeshBasicMaterial({ color: 0xff8800, transparent: true, opacity: .04, side: THREE.DoubleSide }));
+      floorGlow.rotation.x = -Math.PI / 2; floorGlow.position.set(bb3x, .01, bb3z + .7); scene.add(floorGlow);
+
+      // Amber point lights — underglow effect from below + sides
+      const ugl1 = new THREE.PointLight(0xff8800, .7, 10); ugl1.position.set(bb3x - 4, 1.2, bb3z + 1.2); scene.add(ugl1);
+      const ugl2 = new THREE.PointLight(0xff8800, .7, 10); ugl2.position.set(bb3x + 4, 1.2, bb3z + 1.2); scene.add(ugl2);
+      const ugl3 = new THREE.PointLight(0xffaa00, .4, 14); ugl3.position.set(bb3x, 3.5, bb3z + 3); scene.add(ugl3);
+
+      // Slim top accent bar (instead of the crossbar posts of bills 1&2)
+      const topBar3 = new THREE.Mesh(new THREE.BoxGeometry(14.4, .14, .22), bbMountMat);
+      topBar3.position.set(bb3x, 7.37, bb3z + .14); scene.add(topBar3);
+      const topBarGlow = new THREE.Mesh(new THREE.BoxGeometry(14.2, .06, .06), new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: .55 }));
+      topBarGlow.position.set(bb3x, 7.45, bb3z + .22); scene.add(topBarGlow);
+
+      // ── PLAYER (Doctor — matches index.html design) ──────────────────────────
       const player = new THREE.Group(); scene.add(player);
-      const body = new THREE.Mesh(new THREE.BoxGeometry(.7, 1.4, .4), new THREE.MeshStandardMaterial({ color: 0xeef4ff, roughness: .9 })); body.position.y = 2.1; body.castShadow = true; player.add(body);
-      const headM = new THREE.Mesh(new THREE.BoxGeometry(.55, .6, .55), new THREE.MeshStandardMaterial({ color: 0xffccaa, roughness: .9 })); headM.position.y = 3.2; headM.castShadow = true; player.add(headM);
-      const lLeg = new THREE.Mesh(new THREE.BoxGeometry(.28, 1, .28), new THREE.MeshStandardMaterial({ color: 0x334455, roughness: .9 })); lLeg.position.set(-.2, 1, 0); lLeg.castShadow = true; player.add(lLeg);
-      const rLeg = new THREE.Mesh(new THREE.BoxGeometry(.28, 1, .28), new THREE.MeshStandardMaterial({ color: 0x334455, roughness: .9 })); rLeg.position.set(.2, 1, 0); rLeg.castShadow = true; player.add(rLeg);
+
+      // White coat torso
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.62, 1.0, 0.36), new THREE.MeshStandardMaterial({ color: 0xf0f0ec, roughness: 0.7 }));
+      body.position.y = 2.1; body.castShadow = true; player.add(body);
+
+      // Tie
+      const plrTie = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.04), new THREE.MeshStandardMaterial({ color: 0x3a5a8a, roughness: 0.6 }));
+      plrTie.position.set(0, 2.1, 0.19); player.add(plrTie);
+
+      // Stethoscope around neck
+      const plrStetM = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5, metalness: 0.3 });
+      for (let i = 0; i < 4; i++) {
+        const seg = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.015, 6, 12), plrStetM);
+        seg.rotation.x = Math.PI / 2; seg.position.set((i - 1.5) * 0.04, 2.45, 0.18); player.add(seg);
+      }
+
+      // Shoulders + arms (coat + skin forearms)
+      const plrCoatM = new THREE.MeshStandardMaterial({ color: 0xf0f0ec, roughness: 0.7 });
+      const plrSkinM = new THREE.MeshStandardMaterial({ color: 0xddaa88, roughness: 0.9 });
+      [-0.38, 0.38].forEach(sx => {
+        const sh = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.16, 0.36), plrCoatM);
+        sh.position.set(sx, 2.55, 0); player.add(sh);
+        const ua = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.48, 0.17), plrCoatM);
+        ua.position.set(sx, 2.22, 0); player.add(ua);
+        const fa = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.45, 0.15), plrSkinM);
+        fa.position.set(sx, 1.82, 0); player.add(fa);
+      });
+
+      // Neck
+      const plrNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.18, 8), plrSkinM);
+      plrNeck.position.y = 2.68; player.add(plrNeck);
+
+      // Head group (animates independently)
+      const plrHeadGroup = new THREE.Group();
+      plrHeadGroup.position.y = 2.88; player.add(plrHeadGroup);
+      const plrHead = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.5, 0.44), plrSkinM);
+      plrHeadGroup.add(plrHead);
+      // Hair
+      const plrHair = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.16, 0.46), new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8 }));
+      plrHair.position.y = 0.18; plrHeadGroup.add(plrHair);
+      // Glasses
+      const plrGlassM = new THREE.MeshStandardMaterial({ color: 0x3a2a10, roughness: 0.2, metalness: 0.5 });
+      [-0.12, 0.12].forEach(gx => {
+        const frame = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.01, 6, 14), plrGlassM);
+        frame.position.set(gx, 0.06, 0.23); plrHeadGroup.add(frame);
+      });
+      const plrBridge = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.01, 0.01), plrGlassM);
+      plrBridge.position.set(0, 0.06, 0.23); plrHeadGroup.add(plrBridge);
+      // Eyes
+      [-0.12, 0.12].forEach(ex => {
+        const eye = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.05, 0.04), new THREE.MeshStandardMaterial({ color: 0x2a1a08 }));
+        eye.position.set(ex, 0.06, 0.23); plrHeadGroup.add(eye);
+      });
+
+      // Trousers
+      const plrPantsM = new THREE.MeshStandardMaterial({ color: 0x1a2a3a, roughness: 0.75 });
+      const lLeg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.9, 0.22), plrPantsM);
+      lLeg.position.set(-0.16, 1.4, 0); lLeg.castShadow = true; player.add(lLeg);
+      const rLeg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.9, 0.22), plrPantsM);
+      rLeg.position.set(0.16, 1.4, 0); rLeg.castShadow = true; player.add(rLeg);
+
+      // Shoes
+      [-0.16, 0.16].forEach(lx => {
+        const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.13, 0.34), new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.6 }));
+        shoe.position.set(lx, 0.92, 0.06); player.add(shoe);
+      });
+
       player.position.set(0, 0, 6);
 
       // Controls
@@ -1930,7 +2316,7 @@
         else { labCanvas.style.cursor = "default"; hoveredLabel = null; }
       });
 
-      const tpOff = new THREE.Vector3(0, 28, 18); let tpPos = new THREE.Vector3().copy(player.position).add(tpOff);
+      const tpOff = new THREE.Vector3(0, 22, 16); let tpPos = new THREE.Vector3().copy(player.position).add(tpOff);
 
       function loop() {
         requestAnimationFrame(loop);
@@ -1971,7 +2357,13 @@
             scene.userData.doorInnerMat.opacity = .10 + Math.sin(_dt * 2) * .05;
         }
         if (walk) { wt += .25; lLeg.rotation.x = Math.sin(wt) * .7; rLeg.rotation.x = -Math.sin(wt) * .7; body.position.y = 2.1 + Math.abs(Math.sin(wt * 2)) * .02; }
-        else { lLeg.rotation.x = 0; rLeg.rotation.x = 0; body.position.y = 2.1; }
+        else {
+          lLeg.rotation.x = 0; rLeg.rotation.x = 0; body.position.y = 2.1;
+          // Idle head bob
+          const ht = Date.now() * .001;
+          plrHeadGroup.rotation.x = Math.sin(ht * 0.4) * 0.02;
+          plrHeadGroup.rotation.y = Math.sin(ht * 0.25) * 0.03;
+        }
         if (pr.visible) { const t = Date.now() * .003; pmMat.opacity = .3 + Math.sin(t * 4) * .25; const s = 1 + Math.sin(t * 4) * .15; pr.scale.set(s, 1, s); }
 
         labelMeshes.forEach(m => m.lookAt(camera.position));
@@ -1987,7 +2379,8 @@
           camera.lookAt(eye.clone().add(new THREE.Vector3(0, 0, 1).applyQuaternion(player.quaternion)));
         } else {
           tpPos.lerp(player.position.clone().add(tpOff), .08);
-          camera.position.copy(tpPos); camera.lookAt(player.position);
+          camera.position.copy(tpPos);
+          camera.lookAt(player.position.clone().add(new THREE.Vector3(0, 0.5, 0)));
         }
         const t3 = Date.now() * .001;
         scene.children.forEach(c => { if (c.isPointLight && c.color.b > .8) c.intensity = .8 + Math.sin(t3 * 60 + c.position.x) * .01; });
@@ -2006,6 +2399,8 @@
           player.position.set(0, 0, 22);
           player.rotation.y = Math.PI;   // facing -Z (into the lab)
           tgt = null; cm.visible = false; pr.visible = false;
+          // Change the billboard image every re-entry
+          refreshBillboardImage();
           setTimeout(() => { portalArmed = true; }, 1800);
         }
         if (e.data.type === 'PING') {
