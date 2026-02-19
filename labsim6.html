@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MedLab 3D — Type 2 Diabetes</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{overflow:hidden;font-family:'Rajdhani',sans-serif;background:#050a12;}
+    #menu,#labOptions{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:white;z-index:10;}
+    #menu h1{font-size:52px;font-weight:700;letter-spacing:6px;text-transform:uppercase;background:linear-gradient(135deg,#00e5ff,#7c4dff,#00e5ff);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 3s linear infinite;margin-bottom:8px;}
+    #menu p{font-family:'Share Tech Mono',monospace;color:#00e5ff88;font-size:13px;letter-spacing:4px;margin-bottom:6px;}
+    #menu .sub{font-family:'Share Tech Mono',monospace;color:#ff884488;font-size:11px;letter-spacing:3px;margin-bottom:40px;}
+    @keyframes shimmer{0%,100%{background-position:0%}50%{background-position:200%}}
+    .btn{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:600;letter-spacing:3px;padding:14px 36px;margin:8px;border:none;border-radius:4px;cursor:pointer;transition:all 0.25s;text-transform:uppercase;position:relative;overflow:hidden;}
+    .btn-primary{background:linear-gradient(135deg,#00b8d4,#6200ea);color:white;box-shadow:0 0 30px #00e5ff44,0 4px 20px #00000088;}
+    .btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#00e5ff,#7c4dff);opacity:0;transition:opacity 0.25s;}
+    .btn-primary:hover::before{opacity:1;}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 50px #00e5ff66,0 8px 30px #00000099;}
+    .btn-primary span{position:relative;z-index:1;}
+    .btn-secondary{background:transparent;color:#00e5ff;border:1px solid #00e5ff55;box-shadow:0 0 20px #00e5ff22 inset;}
+    .btn-secondary:hover{background:#00e5ff15;border-color:#00e5ff;transform:translateY(-2px);}
+    #labOptions h2{font-size:28px;letter-spacing:5px;text-transform:uppercase;color:#00e5ff;margin-bottom:30px;font-weight:600;}
+    #hud{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:none;font-family:'Share Tech Mono',monospace;color:#00e5ffbb;font-size:12px;letter-spacing:2px;background:#00000088;backdrop-filter:blur(10px);padding:10px 24px;border-radius:40px;border:1px solid #00e5ff22;z-index:10;text-align:center;}
+    #hud span{margin:0 10px;}
+    #hud .key{background:#00e5ff22;border:1px solid #00e5ff44;padding:2px 7px;border-radius:3px;font-size:11px;}
+    #modeIndicator{position:absolute;top:20px;right:24px;font-family:'Share Tech Mono',monospace;color:#00e5ff99;font-size:11px;letter-spacing:3px;background:#00000066;backdrop-filter:blur(10px);padding:8px 16px;border-radius:4px;border:1px solid #00e5ff22;display:none;z-index:10;}
+    #entryOverlay{position:absolute;inset:0;background:radial-gradient(ellipse at center,#050a1200 40%,#050a12 100%);pointer-events:none;z-index:5;}
+    canvas{display:block;position:absolute;inset:0;}
+
+    #drugPanel{display:none;position:absolute;top:50%;left:24px;transform:translateY(-50%);width:320px;background:#020810f2;backdrop-filter:blur(18px);border:1px solid #00e5ff44;border-radius:10px;z-index:20;font-family:'Share Tech Mono',monospace;box-shadow:0 0 40px #00e5ff22,0 20px 60px #000000bb;overflow:hidden;}
+    #dph{padding:14px 18px 12px;border-bottom:1px solid #00e5ff22;background:linear-gradient(135deg,#001a2a,#0a0520);display:flex;justify-content:space-between;align-items:flex-start;}
+    #dptitle{color:#00e5ff;font-size:14px;letter-spacing:3px;font-weight:bold;}
+    #dpclass{color:#00e5ff66;font-size:9px;letter-spacing:2px;margin-top:3px;}
+    #closeDrug{background:none;border:none;color:#00e5ff44;font-size:16px;cursor:pointer;transition:color 0.2s;line-height:1;}
+    #closeDrug:hover{color:#00e5ff;}
+    #dpbody{padding:14px 18px;}
+    .ds{color:#00e5ff66;font-size:9px;letter-spacing:3px;margin:10px 0 5px;}
+    .ds:first-child{margin-top:0;}
+    .dd{color:#c0e0ff;font-size:11px;line-height:1.65;}
+    .dtag{display:inline-block;background:#00e5ff15;border:1px solid #00e5ff33;color:#00e5ffcc;font-size:9px;letter-spacing:1px;padding:2px 7px;border-radius:3px;margin:2px 2px 2px 0;}
+    .dtag.w{background:#ff6b6b15;border-color:#ff6b6b44;color:#ffaaaa;}
+    #dpmech{padding:10px 18px 14px;border-top:1px solid #00e5ff11;color:#9988cc;font-size:10px;line-height:1.6;font-style:italic;}
+    #dpActions{padding:0 18px 14px;display:flex;gap:8px;}
+    #dpActions button{flex:1;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 6px;border-radius:4px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
+    #adminBtn{background:linear-gradient(135deg,#00b8d4,#006688);color:white;border:1px solid #00e5ff66;box-shadow:0 0 12px #00e5ff33;}
+    #adminBtn:hover{box-shadow:0 0 20px #00e5ff66;transform:translateY(-1px);}
+    #adminBtn.administered{background:linear-gradient(135deg,#005500,#228833);border-color:#44ff8866;box-shadow:0 0 12px #44ff8833;pointer-events:none;}
+
+    /* Regimen panel */
+    #regimenPanel{display:none;position:absolute;top:20px;left:24px;width:280px;background:#020810ee;backdrop-filter:blur(18px);border:1px solid #00e5ff33;border-radius:10px;z-index:20;font-family:'Share Tech Mono',monospace;box-shadow:0 0 30px #00000088;overflow:hidden;}
+    #regimenPanel .rp-head{padding:12px 16px 10px;border-bottom:1px solid #00e5ff22;background:linear-gradient(135deg,#0a1a2a,#100820);}
+    #regimenPanel .rp-title{color:#00e5ff;font-size:12px;letter-spacing:3px;font-weight:bold;}
+    #regimenPanel .rp-sub{color:#00e5ff55;font-size:9px;letter-spacing:2px;margin-top:2px;}
+    #regimenPanel .rp-body{padding:10px 16px 14px;max-height:200px;overflow-y:auto;}
+    .regimen-item{padding:6px 0;border-bottom:1px solid #ffffff08;display:flex;justify-content:space-between;align-items:center;}
+    .regimen-item .ri-name{color:#c0e0ff;font-size:10px;letter-spacing:1px;}
+    .regimen-item .ri-dose{color:#00e5ff88;font-size:9px;}
+    .regimen-item .ri-remove{background:none;border:1px solid #ff6b6b33;color:#ff6b6b88;font-size:9px;padding:2px 6px;border-radius:3px;cursor:pointer;transition:all 0.2s;}
+    .regimen-item .ri-remove:hover{border-color:#ff6b6b;color:#ff6b6b;}
+    .rp-empty{color:#ffffff33;font-size:10px;text-align:center;padding:12px 0;}
+    #regimenFeedback{padding:8px 16px 12px;border-top:1px solid #00e5ff11;font-size:10px;line-height:1.5;color:#88aacc;max-height:250px;overflow-y:auto;}
+    #checkRegimenBtn{margin:0 16px 12px;padding:8px;width:calc(100% - 32px);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;background:linear-gradient(135deg,#6200ea,#9c27b0);color:white;border:1px solid #bb86fc55;border-radius:4px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
+    #checkRegimenBtn:hover{box-shadow:0 0 16px #bb86fc44;transform:translateY(-1px);}
+
+    /* Toast */
+    #toast{position:absolute;top:80px;left:50%;transform:translateX(-50%);background:#020810ee;border:1px solid #44ff8844;color:#88ffaa;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;padding:10px 28px;border-radius:6px;z-index:30;display:none;box-shadow:0 0 20px #44ff8833;animation:toastIn .3s ease;}
+    #toast.error{border-color:#ff6b6b44;color:#ffaaaa;box-shadow:0 0 20px #ff6b6b33;}
+    #toast.warning{border-color:#ffaa4444;color:#ffcc88;box-shadow:0 0 20px #ffaa4433;}
+
+    /* Patient chart panel */
+    #patientPanel{display:none;position:absolute;top:50%;right:24px;transform:translateY(-50%);width:380px;max-height:85vh;background:#0a0410f4;backdrop-filter:blur(18px);border:1px solid #ff884466;border-radius:10px;z-index:20;font-family:'Share Tech Mono',monospace;box-shadow:0 0 40px #ff884422,0 20px 60px #000000bb;overflow:hidden;}
+    #pph{padding:14px 18px 12px;border-bottom:1px solid #ff884422;background:linear-gradient(135deg,#1a0a00,#200810);display:flex;justify-content:space-between;align-items:flex-start;}
+    #pptitle{color:#ff8844;font-size:14px;letter-spacing:3px;font-weight:bold;}
+    #ppsubtitle{color:#ff884466;font-size:9px;letter-spacing:2px;margin-top:3px;}
+    #closePatient{background:none;border:none;color:#ff884444;font-size:16px;cursor:pointer;transition:color 0.2s;line-height:1;}
+    #closePatient:hover{color:#ff8844;}
+    #ppbody{padding:14px 18px;overflow-y:auto;max-height:calc(85vh - 60px);}
+    #ppbody .ds{color:#ff884466;font-size:9px;letter-spacing:3px;margin:12px 0 5px;}
+    #ppbody .ds:first-child{margin-top:0;}
+    #ppbody .dd{color:#ddc8b0;font-size:11px;line-height:1.65;}
+    .lab-val{display:inline-block;margin:2px 2px 2px 0;padding:3px 8px;border-radius:3px;font-size:10px;letter-spacing:1px;}
+    .lab-val.crit{background:#ff444418;border:1px solid #ff444444;color:#ffaaaa;}
+    .lab-val.low{background:#4488ff18;border:1px solid #4488ff44;color:#aaccff;}
+    .lab-val.pos{background:#ff884418;border:1px solid #ff884444;color:#ffcc88;}
+    @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-10px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+  </style>
+</head>
+<body>
+<div id="entryOverlay"></div>
+<canvas id="labCanvas"></canvas>
+
+<div id="menu">
+  <h1>MedLab 3D</h1>
+  <p>VIRTUAL SIMULATION ENVIRONMENT</p>
+  <div class="sub">TYPE 2 DIABETES MELLITUS</div>
+  <button class="btn btn-primary" id="playBtn"><span>Enter Lab</span></button>
+</div>
+<div id="labOptions" style="display:none;">
+  <h2>Lab Setup</h2>
+  <button class="btn btn-secondary" id="notesBtn">Insert Notes</button>
+  <button class="btn btn-secondary" id="filesBtn">Upload Files</button>
+  <input type="file" id="fileInput" style="display:none;" multiple>
+  <br><br>
+  <button class="btn btn-primary" id="skipBtn"><span>Skip → Enter Lab</span></button>
+</div>
+<div id="hud">
+  <span><span class="key">Click Floor</span> Move</span>
+  <span><span class="key">Q / E</span> Turn</span>
+  <span><span class="key">5</span> Toggle View</span>
+  <span><span class="key">Click Label</span> Inspect Drug</span>
+  <span><span class="key">Click Board</span> Patient Chart</span>
+</div>
+<div id="modeIndicator">FIRST PERSON</div>
+
+<div id="drugPanel">
+  <div id="dph">
+    <div><div id="dptitle">—</div><div id="dpclass">—</div></div>
+    <button id="closeDrug">✕</button>
+  </div>
+  <div id="dpbody">
+    <div class="ds">INDICATION</div><div class="dd" id="dpind">—</div>
+    <div class="ds">DOSAGE</div><div class="dd" id="dpdose">—</div>
+    <div class="ds">SIDE EFFECTS</div><div id="dpse">—</div>
+    <div class="ds">MONITORING</div><div class="dd" id="dpmon">—</div>
+  </div>
+  <div id="dpmech">—</div>
+  <div id="dpActions">
+    <button id="adminBtn">ADMINISTER TO PATIENT</button>
+  </div>
+</div>
+
+<div id="regimenPanel">
+  <div class="rp-head">
+    <div class="rp-title">PATIENT REGIMEN</div>
+    <div class="rp-sub">T2DM — 54yr M — New Dx + CVD risk</div>
+  </div>
+  <div class="rp-body" id="regimenBody">
+    <div class="rp-empty">No drugs administered yet</div>
+  </div>
+  <button id="checkRegimenBtn">CHECK REGIMEN</button>
+  <div id="regimenFeedback"></div>
+</div>
+
+<div id="toast"></div>
+
+<div id="patientPanel">
+  <div id="pph">
+    <div><div id="pptitle">PATIENT CHART</div><div id="ppsubtitle">ROBERT J. · 54yr M · T2DM New Dx</div></div>
+    <button id="closePatient">✕</button>
+  </div>
+  <div id="ppbody">
+    <div class="ds">PRESENTING COMPLAINT</div>
+    <div class="dd" id="ppPresenting"></div>
+    <div class="ds">VITALS</div>
+    <div class="dd" id="ppVitals"></div>
+    <div class="ds">KEY LABS</div>
+    <div id="ppLabs"></div>
+    <div class="ds">AUTOANTIBODIES</div>
+    <div class="dd" id="ppAb"></div>
+    <div class="ds">DIAGNOSIS</div>
+    <div class="dd" id="ppDx"></div>
+    <div class="ds">MANAGEMENT PLAN</div>
+    <div class="dd" id="ppPlan" style="white-space:pre-line;"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ─── TYPE 2 DIABETES DRUG DATA ─────────────────────────────────
+// correct=true → appropriate for this T2DM patient (newly diagnosed, obese, CVD risk, eGFR 68)
+// correct=false → TRAP / wrong choice with penalty reason
+const DRUGS=[
+  // ── CORRECT CHOICES ──
+  {name:"METFORMIN",cls:"BIGUANIDE · FIRST-LINE T2DM",col:0x226644,lc:"#44cc88",category:"first_line",correct:true,
+   ind:"T2DM first-line per ADA/EASD. Reduces hepatic glucose output. Weight-neutral to modest loss. No hypoglycemia as monotherapy.",
+   dose:"Start 500 mg PO daily with dinner. Titrate by 500 mg/wk to max 2000 mg/day divided. Extended-release if GI intolerant.",
+   se:[["GI upset (nausea, diarrhea, bloating)","w"],["Lactic acidosis (very rare, CI if eGFR <30)","w"],["B12 deficiency (check annually)","w"],["Metallic taste",""]],
+   mon:"HbA1c q3–6mo. eGFR annually (hold if <30, caution 30–45). Vitamin B12 annually. LFTs baseline.",
+   mech:"Activates AMPK → suppresses hepatic gluconeogenesis. Improves peripheral insulin sensitivity. No insulin secretion stimulation → no hypoglycemia alone. CV safety proven, low cost."},
+
+  {name:"EMPAGLIFLOZIN",cls:"SGLT-2 INHIBITOR (JARDIANCE)",col:0x226633,lc:"#44dd88",category:"sglt2",correct:true,
+   ind:"T2DM with CVD or high CV risk — EMPA-REG showed 38% ↓CV death. Renoprotective. This patient: HTN, dyslipidemia, microalbuminuria, family Hx MI.",
+   dose:"10 mg PO once daily AM. May increase to 25 mg. Effective for glycemia until eGFR <20.",
+   se:[["Genital mycotic infections (candida)","w"],["UTI",""],["Volume depletion / hypotension","w"],["Euglycemic DKA (rare in T2DM)","w"],["Fournier's gangrene (very rare)","w"]],
+   mon:"eGFR (CI <20 for glycemic effect). BP. Genital hygiene. Ketones if acutely ill. Volume status.",
+   mech:"Blocks renal SGLT-2 → glucosuria (~70g/day) + natriuresis → lowers BG, BP, weight. ↓Intraglomerular pressure → nephroprotection. Proven CV mortality benefit."},
+
+  {name:"SEMAGLUTIDE",cls:"GLP-1 RECEPTOR AGONIST (OZEMPIC)",col:0x993311,lc:"#ff7744",category:"glp1",correct:true,
+   ind:"T2DM with obesity (BMI 34) and CVD risk. SUSTAIN-6 showed CV benefit. Weight loss 8–14%. HbA1c ↓1.5–1.8%.",
+   dose:"0.25 mg SC weekly ×4wk → 0.5 mg weekly → may ↑ to 1 mg then 2 mg based on response and tolerance.",
+   se:[["Nausea/vomiting (dose-dependent, transient)","w"],["Pancreatitis (rare)","w"],["Thyroid C-cell tumors (rodents; MEN2/MTC CI)","w"],["Gallbladder disease",""],["Appetite suppression",""]],
+   mon:"HbA1c q3mo. Weight. GI tolerance during titration. Thyroid history. Amylase/lipase if abdominal pain.",
+   mech:"GLP-1 RA → glucose-dependent insulin secretion + glucagon suppression + delayed gastric emptying + central appetite reduction. CV benefit beyond glycemia. Major weight loss effect."},
+
+  {name:"ATORVASTATIN",cls:"HMG-CoA REDUCTASE INHIBITOR (STATIN)",col:0x334488,lc:"#6688dd",category:"statin",correct:true,
+   ind:"All T2DM age 40–75 should receive statin (ADA). This patient: LDL 158, TG 310, family Hx MI at 58. High-intensity statin indicated.",
+   dose:"40–80 mg PO daily at bedtime. High-intensity indicated (diabetes + multiple CV risk factors).",
+   se:[["Myalgia (common, usually tolerable)",""],["Hepatotoxicity (rare, check LFTs)","w"],["New-onset diabetes (already diabetic)",""],["Rhabdomyolysis (very rare)","w"]],
+   mon:"Lipid panel baseline → 4–12 wk → annually. LFTs baseline. CK only if symptomatic myalgia.",
+   mech:"Inhibits HMG-CoA reductase → ↓hepatic cholesterol → ↑LDL receptor → ↓serum LDL. Pleiotropic: plaque stabilization, anti-inflammatory, endothelial function."},
+
+  {name:"LISINOPRIL",cls:"ACE INHIBITOR · RENOPROTECTION",col:0x553388,lc:"#9966cc",category:"acei",correct:true,
+   ind:"T2DM with HTN (BP 148/92) AND microalbuminuria (UACR 68). ACEi = first-line antihypertensive in diabetic kidney disease. Target BP <130/80.",
+   dose:"Start 10 mg PO daily. Titrate to 20–40 mg. Target BP <130/80.",
+   se:[["Dry cough (10–15%)",""],["Hyperkalemia","w"],["Angioedema (rare, life-threatening)","w"],["AKI (check Cr after starting)","w"],["Teratogenic — CI in pregnancy","w"]],
+   mon:"BMP 1–2 wk after initiation (Cr + K⁺). BP. UACR annually. Accept up to 30% Cr rise.",
+   mech:"Inhibits ACE → ↓angiotensin II → vasodilation + ↓aldosterone. Dilates efferent arteriole → ↓intraglomerular pressure → slows diabetic nephropathy. BP + renal protection."},
+
+  {name:"LOW-DOSE ASPIRIN",cls:"ANTIPLATELET · CV PREVENTION",col:0x884444,lc:"#cc7777",category:"aspirin",correct:true,
+   ind:"T2DM with elevated ASCVD risk (>10% 10yr). ADA: consider aspirin for primary prevention if ASCVD risk >10% without increased bleeding risk.",
+   dose:"81 mg PO daily with food.",
+   se:[["GI bleeding","w"],["Bruising",""],["Aspirin-exacerbated resp. disease",""],["Reye syndrome (CI children)","w"]],
+   mon:"GI bleeding signs. Concurrent NSAID use. Bleeding risk.",
+   mech:"Irreversibly inhibits COX-1 → ↓thromboxane A2 → ↓platelet aggregation for platelet lifetime (7–10 days). Reduces atherothrombotic events."},
+
+  // ── TRAP / INCORRECT CHOICES ──
+  {name:"INSULIN GLARGINE",cls:"LONG-ACTING BASAL INSULIN",col:0x884400,lc:"#ffaa44",category:"trap_insulin",correct:false,
+   penalty:"Insulin is NOT first-line for newly diagnosed T2DM with HbA1c 9.2%. ADA: start metformin + lifestyle ± second oral/injectable agent. Insulin reserved for HbA1c >10%, catabolic symptoms, or oral agent failure. Premature insulin adds hypoglycemia + weight gain.",
+   ind:"T2DM when oral agents fail, HbA1c >10% on max therapy, or catabolic symptoms. Not first-line for new T2DM with HbA1c 9.2%.",
+   dose:"0.1–0.2 U/kg/day SC once daily. Titrate to fasting BG 80–130.",
+   se:[["Hypoglycemia","w"],["Weight gain (2–4 kg)","w"],["Injection site lipodystrophy",""],["Hypokalemia",""]],
+   mon:"Fasting glucose daily. HbA1c q3mo. Weight.",
+   mech:"Exogenous basal insulin. Appropriate for T2DM only after oral agent failure or HbA1c >10%. This patient's 9.2% warrants aggressive oral combination therapy first."},
+
+  {name:"GLIPIZIDE",cls:"SULFONYLUREA (2ND GEN)",col:0x887722,lc:"#ddcc44",category:"trap_su",correct:false,
+   penalty:"Sulfonylureas cause weight gain (patient already BMI 34) and significant hypoglycemia. NO CV benefit — may increase CV risk. With SGLT2i and GLP-1 RA available offering weight loss + CV protection, SUs are inferior per ADA/EASD for obese patients with CV risk.",
+   ind:"T2DM — older, cheaper. Avoided in obesity + CV risk due to weight gain + hypoglycemia. No CV or renal benefit.",
+   dose:"5 mg daily before breakfast. Max 40 mg/day.",
+   se:[["Hypoglycemia (significant, especially elderly/CKD)","w"],["Weight gain (2–5 kg)","w"],["Agranulocytosis (rare)","w"]],
+   mon:"BG, HbA1c, weight, renal function. Hypo education.",
+   mech:"Binds SUR1 → K-ATP closure → β-cell depolarisation → insulin release (glucose-independent). Weight gain + hypo risk. No CV benefit. Inferior to GLP-1 RA/SGLT2i here."},
+
+  {name:"PIOGLITAZONE",cls:"THIAZOLIDINEDIONE (TZD)",col:0x115566,lc:"#33aacc",category:"trap_tzd",correct:false,
+   penalty:"TZDs cause 4–6 kg weight gain and fluid retention — dangerous for this obese patient with CV risk factors. Increase heart failure risk. Also increase bone fracture risk. SGLT2i and GLP-1 RA offer weight LOSS + CV PROTECTION instead.",
+   ind:"T2DM insulin resistance. Avoided with HF risk, obesity, osteoporosis. Largely replaced by safer alternatives.",
+   dose:"15–45 mg PO daily.",
+   se:[["Fluid retention / edema","w"],["Weight gain (4–6 kg)","w"],["Heart failure (NYHA III–IV CI)","w"],["Bone fractures","w"],["Bladder cancer concern",""]],
+   mon:"LFTs, weight, edema, cardiac status, bone density.",
+   mech:"PPAR-γ agonist → ↑insulin sensitivity. But fluid retention, weight gain, HF risk = poor choice vs SGLT2i/GLP-1 RA which give CV benefit WITH weight loss."},
+
+  {name:"CHLORPROPAMIDE",cls:"SULFONYLUREA (1ST GEN) · OBSOLETE",col:0x665533,lc:"#aa8855",category:"trap_old_su",correct:false,
+   penalty:"First-generation sulfonylurea — essentially obsolete. 36hr half-life causes prolonged dangerous hypoglycemia, especially in elderly/CKD. Causes SIADH/hyponatremia. Disulfiram-like reaction with alcohol. Should never be prescribed in modern practice.",
+   ind:"Historically used for T2DM. Now OBSOLETE — replaced by safer agents.",
+   dose:"100–500 mg PO daily (historical).",
+   se:[["Severe prolonged hypoglycemia (36hr half-life)","w"],["SIADH / hyponatremia","w"],["Disulfiram-like reaction with alcohol","w"],["Weight gain","w"]],
+   mon:"Not applicable — should not be prescribed.",
+   mech:"SU mechanism (K-ATP closure → insulin release) but 36hr half-life → unpredictable prolonged hypoglycemia. Prescribing this is a medical error."},
+
+  {name:"GLYBURIDE",cls:"SULFONYLUREA · HIGH HYPO RISK",col:0x776633,lc:"#bbaa55",category:"trap_glyburide",correct:false,
+   penalty:"Glyburide has the HIGHEST hypoglycemia risk of all sulfonylureas — active metabolites accumulate in renal impairment (this patient's eGFR 68). Associated with worse CV outcomes vs other SUs. Avoided when safer alternatives exist.",
+   ind:"T2DM — older agent. Highest hypo risk among SUs. Avoid in elderly, CKD, and when SGLT2i/GLP-1 RA available.",
+   dose:"2.5–20 mg PO daily.",
+   se:[["Severe hypoglycemia (worst among SUs)","w"],["Weight gain","w"],["Active metabolites in CKD","w"]],
+   mon:"BG frequently. Renal function. Weight.",
+   mech:"Potent long-acting SU with active metabolites accumulating in renal impairment. Patient's eGFR 68 makes accumulation likely. Higher hypo risk than glipizide/glimepiride."},
+
+  {name:"ACARBOSE",cls:"ALPHA-GLUCOSIDASE INHIBITOR",col:0x336655,lc:"#55bb99",category:"trap_agi",correct:false,
+   penalty:"Acarbose has very modest HbA1c reduction (0.5–0.8%) vs metformin (1–1.5%), GLP-1 RA (1.5–1.8%), or SGLT2i (0.7–1.0%). With HbA1c 9.2%, this patient needs potent agents. Significant GI side effects. No CV or renal benefit.",
+   ind:"T2DM adjunct for postprandial hyperglycemia. Weak efficacy. Rarely used when better options available.",
+   dose:"25 mg TID with first bite of meals. Titrate to 100 mg TID.",
+   se:[["Flatulence (very common, often intolerable)","w"],["Diarrhea","w"],["Abdominal bloating","w"],["↑LFTs at high doses",""]],
+   mon:"HbA1c, postprandial glucose, LFTs.",
+   mech:"Inhibits intestinal α-glucosidase → slows carb digestion → blunts postprandial spike. Weak HbA1c reduction. No CV/renal benefit. Inadequate for HbA1c 9.2%."}
+];
+
+// ─── PATIENT DATA ──────────────────────────────────────────────
+const PATIENT={
+  name:"ROBERT J.",age:54,sex:"M",dx:"Newly Diagnosed Type 2 Diabetes Mellitus",
+  hba1c:"9.2%",fbg:"218 mg/dL",cpeptide:"3.8 ng/mL (elevated — insulin resistance)",
+  antibodies:"GAD65 neg, IA-2 neg (rules out T1DM/LADA)",
+  lipids:"TC 248, LDL 158, HDL 36, TG 310",
+  presenting:"6-month history: fatigue, increased thirst, nocturia ×3/night, blurred vision, tingling in feet. Slow-healing cut on left shin. Found on routine labs: FBG 218, HbA1c 9.2%.",
+  vitals:"HR 82, BP 148/92, RR 16, T 36.8°C, BMI 34.2, Waist 112 cm",
+  comorbid:"HTN (uncontrolled), Dyslipidemia, Obesity Class I, Microalbuminuria (UACR 68 mg/g), eGFR 68, FHx: father MI age 58, mother T2DM",
+  plan:"1) Lifestyle: MNT + 150 min/wk exercise\n2) Metformin 500 mg → titrate to 2000 mg\n3) Add SGLT-2i or GLP-1 RA (CV risk)\n4) High-intensity statin (LDL 158)\n5) ACEi for BP + renoprotection\n6) Low-dose aspirin (ASCVD risk >10%)\n7) Foot exam, ophthalmology, diabetes ed."
+};
+
+const SYMPTOMS={
+  t2:["Often asymptomatic for years — insidious onset","Fatigue, polyuria, polydipsia (osmotic)","Blurred vision — lens swelling from hyperglycemia","Recurrent infections — candida, UTI, skin","Slow wound healing, neuropathy (tingling/numbness)","Acanthosis nigricans — velvety darkening at skin folds"],
+  path:["Insulin resistance (muscle, liver, adipose)","Progressive β-cell dysfunction / exhaustion","Hepatic glucose overproduction (↑gluconeogenesis)","↓Incretin effect (GLP-1 response blunted)","↑Glucagon from α-cells (paradoxical)","Genetic predisposition + obesity + inactivity"],
+  mgmt:["Lifestyle: weight loss 5–10%, 150 min/wk exercise","Metformin — first-line (ADA/EASD consensus)","SGLT-2i or GLP-1 RA if CVD, CKD, or HF","Statin for CV protection (nearly all T2DM >40yr)","ACEi/ARB if HTN or albuminuria","HbA1c target <7% (individualize for age/comorbid)"]
+};
+
+// ─── REGIMEN SYSTEM ────────────────────────────────────────────
+let patientRegimen=[];
+let currentDrug=null;
+
+function addToRegimen(drug){
+  if(patientRegimen.find(d=>d.name===drug.name)){showToast(drug.name+" already prescribed","error");return;}
+  patientRegimen.push(drug);
+  updateRegimenUI();
+  if(drug.correct===false){
+    showToast(drug.name+" prescribed — are you sure?","warning");
+  } else {
+    showToast(drug.name+" prescribed ✓","success");
+  }
+}
+
+function removeFromRegimen(name){
+  patientRegimen=patientRegimen.filter(d=>d.name!==name);
+  updateRegimenUI();
+}
+
+function updateRegimenUI(){
+  const body=document.getElementById("regimenBody");
+  const fb=document.getElementById("regimenFeedback");
+  fb.innerHTML='';
+  if(patientRegimen.length===0){
+    body.innerHTML='<div class="rp-empty">No drugs prescribed yet</div>';
+    return;
+  }
+  body.innerHTML=patientRegimen.map(d=>{
+    const isWrong=d.correct===false;
+    const nameCol=isWrong?'#ffaa88':'#c0e0ff';
+    const catLabel=isWrong?'⚠ '+d.cls.split('·')[0].trim():d.category.toUpperCase();
+    const catCol=isWrong?'#ff886688':'#00e5ff88';
+    return `<div class="regimen-item" style="${isWrong?'border-left:2px solid #ff664488;padding-left:6px;':''}">
+      <div><div class="ri-name" style="color:${nameCol}">${d.name}</div><div class="ri-dose" style="color:${catCol}">${catLabel}</div></div>
+      <button class="ri-remove" onclick="removeFromRegimen('${d.name}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function checkRegimen(){
+  const fb=document.getElementById("regimenFeedback");
+  let msgs=[];
+  let score=0;
+  let penalties=0;
+
+  const wrongDrugs=patientRegimen.filter(d=>d.correct===false);
+  const correctDrugs=patientRegimen.filter(d=>d.correct===true);
+
+  wrongDrugs.forEach(d=>{
+    msgs.push('✗ '+d.name+' — '+d.penalty);
+    penalties+=12;
+  });
+
+  // ── GLYCEMIC MANAGEMENT ──
+  const cats=correctDrugs.map(d=>d.category);
+  const hasMetformin=cats.includes("first_line");
+  const hasSGLT2=cats.includes("sglt2");
+  const hasGLP1=cats.includes("glp1");
+
+  if(hasMetformin){msgs.push('✓ Metformin — first-line T2DM therapy per ADA/EASD');score+=20;}
+  else msgs.push('✗ MISSING metformin — first-line for all T2DM without contraindication');
+
+  if(hasSGLT2){msgs.push('✓ SGLT-2 inhibitor — CV + renal benefit for high-risk patient');score+=15;}
+  if(hasGLP1){msgs.push('✓ GLP-1 RA — CV benefit + weight loss for obese patient');score+=15;}
+  if(!hasSGLT2&&!hasGLP1) msgs.push('✗ MISSING SGLT-2i or GLP-1 RA — patient has CVD risk requiring cardioprotective agent');
+
+  // ── CV RISK MANAGEMENT ──
+  const hasStatin=cats.includes("statin");
+  const hasACEi=cats.includes("acei");
+  const hasAspirin=cats.includes("aspirin");
+
+  if(hasStatin){msgs.push('✓ Statin — essential, LDL 158 needs high-intensity therapy');score+=15;}
+  else msgs.push('✗ MISSING statin — ADA recommends for nearly all T2DM age >40');
+
+  if(hasACEi){msgs.push('✓ ACE inhibitor — BP + renoprotection (UACR 68, eGFR 68)');score+=15;}
+  else msgs.push('✗ MISSING ACEi/ARB — HTN 148/92 + microalbuminuria needs treatment');
+
+  if(hasAspirin){msgs.push('✓ Low-dose aspirin — appropriate for elevated ASCVD risk');score+=10;}
+  else msgs.push('⚠ Consider aspirin — ASCVD risk >10%');
+
+  if(hasMetformin&&(hasSGLT2||hasGLP1)&&hasStatin&&hasACEi) score+=5;
+
+  score=Math.max(0,score-penalties);
+  const maxPossible=95;
+
+  let grade,gradeCol;
+  if(wrongDrugs.length>=3){grade='DANGEROUS PRESCRIBING';gradeCol='#ff0000';}
+  else if(wrongDrugs.length>0&&score<40){grade='HARMFUL REGIMEN';gradeCol='#ff2222';}
+  else if(wrongDrugs.length>0){grade='ERRORS IN REGIMEN';gradeCol='#ff6644';}
+  else if(score>=85){grade='EXCELLENT — GUIDELINE-CONCORDANT';gradeCol='#44ff88';}
+  else if(score>=65){grade='GOOD';gradeCol='#88dd66';}
+  else if(score>=45){grade='INCOMPLETE';gradeCol='#ffcc44';}
+  else if(score>=20){grade='MAJOR GAPS';gradeCol='#ff8844';}
+  else{grade='CRITICAL — PATIENT AT RISK';gradeCol='#ff4444';}
+
+  fb.innerHTML=
+    `<div style="color:${gradeCol};font-size:11px;letter-spacing:2px;margin-bottom:4px;font-weight:bold;">REGIMEN: ${grade}</div>`+
+    `<div style="color:#888;font-size:9px;margin-bottom:8px;">${correctDrugs.length} correct · ${wrongDrugs.length} incorrect · Score: ${score}/${maxPossible}</div>`+
+    msgs.map(m=>`<div style="color:${m.startsWith('✓')?'#88ffaa':m.startsWith('✗')?'#ff8888':'#ffcc88'};margin:3px 0;font-size:10px;line-height:1.4;">${m}</div>`).join('');
+}
+
+
+// ─── ENTRY SCENE ───────────────────────────────────────────────
+const menu=document.getElementById("menu"),labOptions=document.getElementById("labOptions"),labCanvas=document.getElementById("labCanvas"),hud=document.getElementById("hud"),modeIndicator=document.getElementById("modeIndicator");
+const eScene=new THREE.Scene(); eScene.background=new THREE.Color(0x050a12); eScene.fog=new THREE.Fog(0x050a12,10,40);
+const eCam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1000); eCam.position.z=10;
+const eRend=new THREE.WebGLRenderer({canvas:labCanvas,antialias:true}); eRend.setSize(innerWidth,innerHeight); eRend.setPixelRatio(Math.min(devicePixelRatio,2));
+const pg=new THREE.BufferGeometry(),pp=new Float32Array(600);
+for(let i=0;i<200;i++){pp[i*3]=(Math.random()-.5)*30;pp[i*3+1]=(Math.random()-.5)*30;pp[i*3+2]=(Math.random()-.5)*30;}
+pg.setAttribute('position',new THREE.BufferAttribute(pp,3));
+eScene.add(new THREE.Points(pg,new THREE.PointsMaterial({color:0x00e5ff,size:.08,transparent:true,opacity:.7})));
+for(let i=0;i<3;i++){const t=new THREE.Mesh(new THREE.TorusGeometry(2+i*1.5,.04,8,80),new THREE.MeshBasicMaterial({color:[0x00e5ff,0x7c4dff,0x00b8d4][i],transparent:true,opacity:.5-i*.1}));t.rotation.x=Math.PI/3*i;t.rotation.z=Math.PI/4*i;t.userData.speed=.003+i*.002;t.userData.axis=new THREE.Vector3(Math.random(),Math.random(),Math.random()).normalize();eScene.add(t);}
+eScene.add(new THREE.AmbientLight(0x00e5ff,.2));
+let eRun=true;
+function animEntry(){if(!eRun)return;requestAnimationFrame(animEntry);const t=Date.now()*.001;eScene.children.forEach(o=>{if(o.userData.axis)o.rotateOnAxis(o.userData.axis,o.userData.speed);});eCam.position.x=Math.sin(t*.1)*2;eCam.position.y=Math.cos(t*.07);eCam.lookAt(0,0,0);eRend.render(eScene,eCam);}
+animEntry();
+
+document.getElementById("playBtn").onclick=()=>{menu.style.display="none";labOptions.style.display="block";};
+document.getElementById("notesBtn").onclick=()=>{const n=prompt("Insert clinical notes:");if(n)alert("Saved.");};
+const fi=document.getElementById("fileInput");
+document.getElementById("filesBtn").onclick=()=>fi.click();
+fi.onchange=()=>{labOptions.style.display="none";eRun=false;startLab();};
+document.getElementById("skipBtn").onclick=()=>{labOptions.style.display="none";eRun=false;startLab();};
+
+// ─── TEXTURE HELPERS ───────────────────────────────────────────
+function makeDrugTex(drug){
+  const W=512,H=256,c=document.createElement('canvas');c.width=W;c.height=H;
+  const x=c.getContext('2d');
+  x.fillStyle='#040c18';x.fillRect(0,0,W,H);
+  x.fillStyle=drug.lc;x.globalAlpha=.12;x.fillRect(0,0,W,H);x.globalAlpha=1;
+  x.fillStyle=drug.lc;x.fillRect(0,0,W,6);x.fillRect(0,H-6,W,6);
+  x.strokeStyle=drug.lc;x.globalAlpha=.5;x.lineWidth=2;x.strokeRect(2,2,W-4,H-4);x.globalAlpha=1;
+  x.fillStyle=drug.lc;x.font='bold 36px monospace';x.textAlign='center';x.fillText(drug.name,W/2,58);
+  x.fillStyle='#ffffff77';x.font='13px monospace';x.fillText(drug.cls,W/2,80);
+  // Category badge
+  const catCol={first_line:'#44cc88',sglt2:'#44dd88',glp1:'#ff7744',statin:'#6688dd',acei:'#9966cc',aspirin:'#cc7777',trap_insulin:'#ffaa44',trap_su:'#ddcc44',trap_tzd:'#33aacc',trap_old_su:'#aa8855',trap_glyburide:'#bbaa55',trap_agi:'#55bb99'}[drug.category]||'#888';
+  x.fillStyle=catCol;x.globalAlpha=.25;
+  const bw=x.measureText(drug.category.toUpperCase()).width+20;
+  x.fillRect(W/2-bw/2,88,bw,18);x.globalAlpha=1;
+  x.fillStyle=catCol;x.font='bold 10px monospace';x.fillText(drug.category.toUpperCase(),W/2,101);
+
+  x.strokeStyle=drug.lc;x.globalAlpha=.25;x.lineWidth=1;x.beginPath();x.moveTo(30,112);x.lineTo(W-30,112);x.stroke();x.globalAlpha=1;
+  x.fillStyle='#aaccff';x.font='12px monospace';x.textAlign='center';
+  const words=drug.mech.split(' ');let line='',lines=[];
+  for(const w of words){const t=line+w+' ';if(x.measureText(t).width>W-60&&line){lines.push(line.trim());line=w+' ';}else line=t;}lines.push(line.trim());
+  lines.slice(0,3).forEach((l,i)=>x.fillText(l,W/2,130+i*17));
+  x.fillStyle=drug.lc;x.globalAlpha=.7;x.font='11px monospace';x.fillText('[ CLICK TO INSPECT ]',W/2,H-14);x.globalAlpha=1;
+  return new THREE.CanvasTexture(c);
+}
+
+function makeBillTex(){
+  const W=1280,H=800,c=document.createElement('canvas');c.width=W;c.height=H;
+  const x=c.getContext('2d');
+  x.fillStyle='#020810';x.fillRect(0,0,W,H);
+  const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#00e5ff');g.addColorStop(.5,'#7c4dff');g.addColorStop(1,'#00e5ff');
+  x.strokeStyle=g;x.lineWidth=4;x.strokeRect(4,4,W-8,H-8);x.lineWidth=1;x.globalAlpha=.25;x.strokeRect(12,12,W-24,H-24);x.globalAlpha=1;
+  x.fillStyle='#00e5ff';x.font='bold 44px monospace';x.textAlign='center';x.fillText('TYPE 2 DIABETES MELLITUS',W/2,58);
+  x.fillStyle='#ffffff55';x.font='15px monospace';x.fillText('INSULIN RESISTANCE · PROGRESSIVE β-CELL DYSFUNCTION',W/2,83);
+  x.strokeStyle='#00e5ff44';x.lineWidth=1;x.beginPath();x.moveTo(40,98);x.lineTo(W-40,98);x.stroke();
+  const cols=[
+    {x:W*.18,label:'PRESENTATION',color:'#55aaff',data:SYMPTOMS.t2},
+    {x:W*.5,label:'PATHOPHYSIOLOGY',color:'#ff8844',data:SYMPTOMS.path},
+    {x:W*.82,label:'MANAGEMENT',color:'#44ee88',data:SYMPTOMS.mgmt}
+  ];
+  cols.forEach(col=>{
+    x.fillStyle=col.color;x.font='bold 19px monospace';x.textAlign='center';x.fillText(col.label,col.x,128);
+    x.strokeStyle=col.color;x.globalAlpha=.3;x.lineWidth=1;x.beginPath();x.moveTo(col.x-155,138);x.lineTo(col.x+155,138);x.stroke();x.globalAlpha=1;
+    col.data.forEach((item,ii)=>{
+      const y=162+ii*97;
+      x.fillStyle=col.color;x.globalAlpha=.9;x.beginPath();x.arc(col.x-150,y+5,5,0,Math.PI*2);x.fill();x.globalAlpha=1;
+      x.textAlign='left';
+      const words=item.split(' ');let line='',lines=[];
+      x.font='13px monospace';
+      for(const w of words){const t=line+w+' ';if(x.measureText(t).width>270&&line){lines.push(line.trim());line=w+' ';}else line=t;}lines.push(line.trim());
+      lines.forEach((l,li)=>{
+        x.fillStyle=li===0?'#d8eeff':'#7aaccc';x.font='13px monospace';x.fillText(l,col.x-140,y+li*16);
+      });
+    });
+  });
+  x.fillStyle='#ffffff33';x.font='13px monospace';x.textAlign='center';
+  x.fillText('Dx: HbA1c ≥ 6.5% · FBG ≥ 126 mg/dL · 2hr OGTT ≥ 200 mg/dL · Random ≥ 200 + symptoms',W/2,H-18);
+  return new THREE.CanvasTexture(c);
+}
+
+function makePatientTex(){
+  const W=1280,H=800,c=document.createElement('canvas');c.width=W;c.height=H;
+  const x=c.getContext('2d');
+  x.fillStyle='#020810';x.fillRect(0,0,W,H);
+  // Border
+  const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#ff8844');g.addColorStop(.5,'#ff4488');g.addColorStop(1,'#ff8844');
+  x.strokeStyle=g;x.lineWidth=3;x.strokeRect(4,4,W-8,H-8);
+
+  // Title
+  x.fillStyle='#ff8844';x.font='bold 36px monospace';x.textAlign='center';x.fillText('PATIENT PRESENTATION',W/2,50);
+  x.fillStyle='#ffffff44';x.font='14px monospace';x.fillText(PATIENT.name+' · '+PATIENT.age+'yr '+PATIENT.sex+' · '+PATIENT.dx,W/2,75);
+
+  // Draw patient silhouette on left — obese body habitus
+  const sx=220,sy=160;
+  x.save();
+  x.fillStyle='#ff884422';
+  x.strokeStyle='#ff884488';
+  x.lineWidth=2;
+  // Head
+  x.beginPath();x.arc(sx,sy,44,0,Math.PI*2);x.fill();x.stroke();
+  // Neck (thicker)
+  x.fillRect(sx-16,sy+44,32,18);x.strokeRect(sx-16,sy+44,32,18);
+  // Torso — wider for obesity
+  x.beginPath();x.moveTo(sx-70,sy+62);x.lineTo(sx+70,sy+62);
+  x.quadraticCurveTo(sx+85,sy+140,sx+65,sy+230);
+  x.lineTo(sx-65,sy+230);
+  x.quadraticCurveTo(sx-85,sy+140,sx-70,sy+62);
+  x.closePath();x.fill();x.stroke();
+  // Central obesity belly outline
+  x.strokeStyle='#ff884444';x.lineWidth=1;
+  x.beginPath();x.ellipse(sx,sy+155,60,55,0,0,Math.PI*2);x.stroke();
+  x.strokeStyle='#ff884488';x.lineWidth=2;
+  // Arms
+  x.beginPath();x.moveTo(sx-70,sy+62);x.lineTo(sx-100,sy+185);x.lineTo(sx-82,sy+190);x.lineTo(sx-58,sy+90);x.closePath();x.fill();x.stroke();
+  x.beginPath();x.moveTo(sx+70,sy+62);x.lineTo(sx+100,sy+185);x.lineTo(sx+82,sy+190);x.lineTo(sx+58,sy+90);x.closePath();x.fill();x.stroke();
+  // Legs
+  x.beginPath();x.moveTo(sx-55,sy+230);x.lineTo(sx-58,sy+375);x.lineTo(sx-30,sy+377);x.lineTo(sx-10,sy+235);x.closePath();x.fill();x.stroke();
+  x.beginPath();x.moveTo(sx+55,sy+230);x.lineTo(sx+58,sy+375);x.lineTo(sx+30,sy+377);x.lineTo(sx+10,sy+235);x.closePath();x.fill();x.stroke();
+
+  // Annotation arrows for T2DM presentation
+  const annots=[
+    {x:sx,y:sy-55,label:"Blurred vision",tx:sx+130,ty:sy-50},
+    {x:sx+30,y:sy+10,label:"Acanthosis nigricans (neck)",tx:sx+130,ty:sy+10},
+    {x:sx+75,y:sy+145,label:"Central obesity (BMI 34)",tx:sx+140,ty:sy+140},
+    {x:sx-75,y:sy+100,label:"HTN 148/92",tx:sx-230,ty:sy+100},
+    {x:sx-60,y:sy+175,label:"Dyslipidemia (LDL 158, TG 310)",tx:sx-290,ty:sy+175},
+    {x:sx,y:sy+350,label:"Tingling/numbness (neuropathy)",tx:sx+140,ty:sy+350},
+    {x:sx+55,y:sy+370,label:"Slow-healing wound (L shin)",tx:sx+140,ty:sy+380},
+    {x:sx-55,y:sy+250,label:"Microalbuminuria (eGFR 68)",tx:sx-290,ty:sy+250},
+  ];
+  x.font='11px monospace';
+  annots.forEach(a=>{
+    x.strokeStyle='#ff884466';x.lineWidth=1;
+    x.beginPath();x.moveTo(a.x,a.y);x.lineTo(a.tx,a.ty);x.stroke();
+    x.fillStyle='#ffccaa';x.textAlign=a.tx<sx?'right':'left';
+    x.fillText(a.label,a.tx+(a.tx<sx?-6:6),a.ty+4);
+  });
+
+  // Vital signs / labs panel on right
+  const rx=720,ry=100;
+  x.textAlign='left';
+  x.fillStyle='#ff884499';x.font='bold 16px monospace';x.fillText('VITALS',rx,ry);
+  x.fillStyle='#ccddff';x.font='12px monospace';
+  PATIENT.vitals.split(', ').forEach((v,i)=>x.fillText(v,rx,ry+22+i*18));
+
+  const ly=ry+145;
+  x.fillStyle='#ff884499';x.font='bold 16px monospace';x.fillText('KEY LABS',rx,ly);
+  x.fillStyle='#ff6666';x.font='12px monospace';
+  x.fillText('HbA1c: '+PATIENT.hba1c+' (↑↑)',rx,ly+22);
+  x.fillText('Fasting BG: '+PATIENT.fbg+' (↑↑)',rx,ly+40);
+  x.fillStyle='#ffcc66';
+  x.fillText('Lipids: '+PATIENT.lipids,rx,ly+58);
+  x.fillStyle='#44aaff';
+  x.fillText('C-peptide: '+PATIENT.cpeptide,rx,ly+76);
+  x.fillText('Antibodies: '+PATIENT.antibodies,rx,ly+94);
+
+  const cy=ly+130;
+  x.fillStyle='#ff884499';x.font='bold 16px monospace';x.fillText('COMORBIDITIES',rx,cy);
+  x.fillStyle='#ddbbaa';x.font='11px monospace';
+  const cwords=PATIENT.comorbid.split(', ');
+  let cline='',clines=[];
+  for(const w of cwords){const t=cline+w+', ';if(x.measureText(t).width>480&&cline){clines.push(cline.trim().replace(/,$/,''));cline=w+', ';}else cline=t;}clines.push(cline.trim().replace(/,$/,''));
+  clines.forEach((l,i)=>x.fillText(l,rx,cy+20+i*16));
+
+  const py=cy+20+clines.length*16+20;
+  x.fillStyle='#ff884499';x.font='bold 16px monospace';x.fillText('PRESENTING COMPLAINT',rx,py);
+  x.fillStyle='#bbccdd';x.font='11px monospace';
+  const pwords=PATIENT.presenting.split(' ');let pline='',plines=[];
+  for(const w of pwords){const t=pline+w+' ';if(x.measureText(t).width>480&&pline){plines.push(pline.trim());pline=w+' ';}else pline=t;}plines.push(pline.trim());
+  plines.forEach((l,i)=>x.fillText(l,rx,py+20+i*16));
+
+  const my=py+20+plines.length*16+30;
+  x.fillStyle='#44ee88aa';x.font='bold 16px monospace';x.fillText('MANAGEMENT PLAN',rx,my);
+  x.fillStyle='#aaddbb';x.font='11px monospace';
+  PATIENT.plan.split('\n').forEach((l,i)=>x.fillText(l,rx,my+20+i*18));
+
+  // Click hint at bottom
+  x.restore();
+  x.fillStyle='#ff8844';x.globalAlpha=.7;x.font='bold 13px monospace';x.textAlign='center';
+  x.fillText('[ CLICK BOARD TO OPEN FULL PATIENT CHART ]',W/2,H-16);
+  x.globalAlpha=1;
+  return new THREE.CanvasTexture(c);
+}
+
+// ─── MAIN LAB ──────────────────────────────────────────────────
+function startLab(){
+  hud.style.display="block";modeIndicator.style.display="block";
+  document.getElementById("regimenPanel").style.display="block";
+  const scene=new THREE.Scene();scene.background=new THREE.Color(0x0a0f1a);scene.fog=new THREE.FogExp2(0x0a0f1a,.015);
+  const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,200);camera.position.set(0,3.2,12);
+  const renderer=new THREE.WebGLRenderer({canvas:labCanvas,antialias:true});
+  renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.9;
+
+  // Lighting
+  scene.add(new THREE.AmbientLight(0x1a2a4a,1.2));
+  [[-12,7,-12],[0,7,-12],[12,7,-12],[-12,7,0],[0,7,0],[12,7,0],[-12,7,12],[0,7,12],[12,7,12]].forEach(([x,y,z])=>{
+    const l=new THREE.PointLight(0xd0eeff,.8,20);l.position.set(x,y,z);l.castShadow=true;l.shadow.mapSize.width=512;l.shadow.mapSize.height=512;scene.add(l);
+    const s=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,2.5,8),new THREE.MeshBasicMaterial({color:0xd0eeff,transparent:true,opacity:.9}));s.rotation.z=Math.PI/2;s.position.set(x,7.15,z);scene.add(s);
+  });
+  const tl=new THREE.PointLight(0x00e5ff,.4,30);tl.position.set(-18,3,-18);scene.add(tl);
+  const pl2=new THREE.PointLight(0x7c4dff,.3,30);pl2.position.set(18,3,18);scene.add(pl2);
+
+  // Room
+  const RW=52,RH=9,RD=52;
+  const room=new THREE.Mesh(new THREE.BoxGeometry(RW,RH,RD),new THREE.MeshStandardMaterial({color:0xc8d4e0,roughness:.85,side:THREE.BackSide}));
+  room.position.y=RH/2;room.receiveShadow=true;scene.add(room);
+  const aM=new THREE.MeshBasicMaterial({color:0x00e5ff,transparent:true,opacity:.3});
+  [{p:[0,8.3,-RD/2+.1],s:[RW,.06,.12]},{p:[0,8.3,RD/2-.1],s:[RW,.06,.12]},{p:[-RW/2+.1,8.3,0],s:[.12,.06,RD]},{p:[RW/2-.1,8.3,0],s:[.12,.06,RD]}].forEach(({p,s})=>{const m=new THREE.Mesh(new THREE.BoxGeometry(...s),aM);m.position.set(...p);scene.add(m);});
+
+  // Floor
+  function mkFloorTex(){const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');const ts=64;for(let tx=0;tx<8;tx++)for(let ty=0;ty<8;ty++){x.fillStyle=(tx+ty)%2===0?'#b8c8d4':'#a8b8c4';x.fillRect(tx*ts,ty*ts,ts,ts);x.strokeStyle='#8898a4';x.lineWidth=2;x.strokeRect(tx*ts+1,ty*ts+1,ts-2,ts-2);}const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(6,6);return t;}
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(RW,RD),new THREE.MeshStandardMaterial({map:mkFloorTex(),roughness:.3,metalness:.1}));
+  floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+
+  // Tables + drug labels
+  const labelMeshes=[];
+  const tPos=[[-18,-12],[-8,-12],[2,-12],[12,-12],[-18,3],[-8,3],[2,3],[12,3],[-18,16],[-8,16],[2,16],[12,16]];
+
+  tPos.forEach(([tx,tz],i)=>{
+    const drug=DRUGS[i]||null;
+    // Table top
+    const top=new THREE.Mesh(new THREE.BoxGeometry(3.2,.08,1.8),new THREE.MeshStandardMaterial({color:0xf0f4f8,roughness:.3,metalness:.05}));
+    top.position.x=tx;top.position.y=1.84;top.position.z=tz;top.castShadow=true;scene.add(top);
+    // Cabinet
+    const cab=new THREE.Mesh(new THREE.BoxGeometry(3,.9,1.6),new THREE.MeshStandardMaterial({color:0x9aafbf,roughness:.6}));
+    cab.position.x=tx;cab.position.y=1.3;cab.position.z=tz;cab.castShadow=true;scene.add(cab);
+    // Cabinet doors
+    [-0.76,.76].forEach(dx=>{const d=new THREE.Mesh(new THREE.BoxGeometry(1.38,.82,.04),new THREE.MeshStandardMaterial({color:0xb0c4d4,roughness:.4}));d.position.x=tx+dx;d.position.y=1.3;d.position.z=tz+.82;scene.add(d);});
+    // Legs
+    [[-1.4,.7],[1.4,.7],[-1.4,-.7],[1.4,-.7]].forEach(([lx,lz])=>{const leg=new THREE.Mesh(new THREE.BoxGeometry(.07,.84,.07),new THREE.MeshStandardMaterial({color:0xd0d8e0,roughness:.3,metalness:.7}));leg.position.x=tx+lx;leg.position.y=.42;leg.position.z=tz+lz;scene.add(leg);});
+    // Beaker + liquid
+    const bk=new THREE.Mesh(new THREE.CylinderGeometry(.09,.07,.22,12),new THREE.MeshStandardMaterial({color:0x88c8ff,transparent:true,opacity:.45}));
+    bk.position.x=tx-.5;bk.position.y=1.97;bk.position.z=tz+.2;scene.add(bk);
+    if(drug){
+      const lc=new THREE.Color(drug.col);
+      const lq=new THREE.Mesh(new THREE.CylinderGeometry(.075,.06,.12,12),new THREE.MeshStandardMaterial({color:lc,transparent:true,opacity:.85,emissive:lc,emissiveIntensity:.4}));
+      lq.position.x=tx-.5;lq.position.y=1.91;lq.position.z=tz+.2;scene.add(lq);
+      const gl=new THREE.PointLight(new THREE.Color(drug.col),0.4,4);
+      gl.position.x=tx;gl.position.y=2.5;gl.position.z=tz;scene.add(gl);
+    }
+    // Petri dish
+    const dish=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,.03,16),new THREE.MeshStandardMaterial({color:0xeef4ff,transparent:true,opacity:.5}));
+    dish.position.x=tx+.4;dish.position.y=1.855;dish.position.z=tz-.2;scene.add(dish);
+    // Drug label
+    if(drug){
+      const labelMesh=new THREE.Mesh(new THREE.PlaneGeometry(3,1.5),new THREE.MeshBasicMaterial({map:makeDrugTex(drug),transparent:true,side:THREE.DoubleSide,depthWrite:false}));
+      labelMesh.position.x=tx;labelMesh.position.y=3.1;labelMesh.position.z=tz;
+      labelMesh.userData.drug=drug;
+      scene.add(labelMesh);
+      labelMeshes.push(labelMesh);
+      const gf=new THREE.Mesh(new THREE.PlaneGeometry(3.15,1.6),new THREE.MeshBasicMaterial({color:new THREE.Color(drug.col),transparent:true,opacity:.07,side:THREE.DoubleSide,depthWrite:false}));
+      gf.position.x=tx;gf.position.y=3.1;gf.position.z=tz-.02;scene.add(gf);
+    }
+  });
+
+  // Wall cabinets
+  [-24,-12,0,12,24].forEach(wx=>{
+    const cab=new THREE.Mesh(new THREE.BoxGeometry(2.8,1.2,.5),new THREE.MeshStandardMaterial({color:0x9aafc0,roughness:.5}));
+    cab.position.x=wx;cab.position.y=6.5;cab.position.z=-RD/2+.5;cab.castShadow=true;scene.add(cab);
+  });
+
+  // ── BILLBOARD 1: T2DM Clinical Reference (back wall center-left) ──
+  const postM=new THREE.MeshStandardMaterial({color:0x445566,roughness:.4,metalness:.7});
+  const bb1x=-13;
+  [-4.8,4.8].forEach(dx=>{
+    const post=new THREE.Mesh(new THREE.BoxGeometry(.2,5.5,.2),postM);
+    post.position.x=bb1x+dx;post.position.y=3.75;post.position.z=-RD/2+1.6;scene.add(post);
+  });
+  const cb1=new THREE.Mesh(new THREE.BoxGeometry(10.5,.2,.2),postM);cb1.position.x=bb1x;cb1.position.y=6.6;cb1.position.z=-RD/2+1.6;scene.add(cb1);
+  const backing1=new THREE.Mesh(new THREE.BoxGeometry(9.8,4.6,.1),new THREE.MeshStandardMaterial({color:0x030c18,roughness:.9}));
+  backing1.position.x=bb1x;backing1.position.y=4.4;backing1.position.z=-RD/2+1.55;scene.add(backing1);
+  const bill1=new THREE.Mesh(new THREE.PlaneGeometry(9.6,4.5),new THREE.MeshBasicMaterial({map:makeBillTex()}));
+  bill1.position.x=bb1x;bill1.position.y=4.4;bill1.position.z=-RD/2+1.65;scene.add(bill1);
+  const spot1=new THREE.SpotLight(0xffffff,2,20,Math.PI/5,.4);
+  spot1.position.set(bb1x,8.5,-RD/2+7);spot1.target.position.set(bb1x,4.4,-RD/2+1.6);scene.add(spot1);scene.add(spot1.target);
+  // Glow strip
+  const bgs1=new THREE.Mesh(new THREE.BoxGeometry(9.8,.08,.08),new THREE.MeshBasicMaterial({color:0x00e5ff,transparent:true,opacity:.6}));
+  bgs1.position.x=bb1x;bgs1.position.y=6.7;bgs1.position.z=-RD/2+1.66;scene.add(bgs1);
+
+  // ── BILLBOARD 2: Patient Silhouette (back wall center-right) ──
+  const bb2x=13;
+  [-4.8,4.8].forEach(dx=>{
+    const post=new THREE.Mesh(new THREE.BoxGeometry(.2,5.5,.2),postM);
+    post.position.x=bb2x+dx;post.position.y=3.75;post.position.z=-RD/2+1.6;scene.add(post);
+  });
+  const cb2=new THREE.Mesh(new THREE.BoxGeometry(10.5,.2,.2),postM);cb2.position.x=bb2x;cb2.position.y=6.6;cb2.position.z=-RD/2+1.6;scene.add(cb2);
+  const backing2=new THREE.Mesh(new THREE.BoxGeometry(9.8,4.6,.1),new THREE.MeshStandardMaterial({color:0x030c18,roughness:.9}));
+  backing2.position.x=bb2x;backing2.position.y=4.4;backing2.position.z=-RD/2+1.55;scene.add(backing2);
+  const bill2=new THREE.Mesh(new THREE.PlaneGeometry(9.6,4.5),new THREE.MeshBasicMaterial({map:makePatientTex()}));
+  bill2.position.x=bb2x;bill2.position.y=4.4;bill2.position.z=-RD/2+1.65;scene.add(bill2);
+  const spot2=new THREE.SpotLight(0xffffff,2,20,Math.PI/5,.4);
+  spot2.position.set(bb2x,8.5,-RD/2+7);spot2.target.position.set(bb2x,4.4,-RD/2+1.6);scene.add(spot2);scene.add(spot2.target);
+  const bgs2=new THREE.Mesh(new THREE.BoxGeometry(9.8,.08,.08),new THREE.MeshBasicMaterial({color:0xff8844,transparent:true,opacity:.6}));
+  bgs2.position.x=bb2x;bgs2.position.y=6.7;bgs2.position.z=-RD/2+1.66;scene.add(bgs2);
+
+  // ── PLAYER ──
+  const player=new THREE.Group();scene.add(player);
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.7,1.4,.4),new THREE.MeshStandardMaterial({color:0xeef4ff,roughness:.9}));body.position.y=2.1;body.castShadow=true;player.add(body);
+  const headM=new THREE.Mesh(new THREE.BoxGeometry(.55,.6,.55),new THREE.MeshStandardMaterial({color:0xffccaa,roughness:.9}));headM.position.y=3.2;headM.castShadow=true;player.add(headM);
+  const lLeg=new THREE.Mesh(new THREE.BoxGeometry(.28,1,.28),new THREE.MeshStandardMaterial({color:0x334455,roughness:.9}));lLeg.position.set(-.2,1,0);lLeg.castShadow=true;player.add(lLeg);
+  const rLeg=new THREE.Mesh(new THREE.BoxGeometry(.28,1,.28),new THREE.MeshStandardMaterial({color:0x334455,roughness:.9}));rLeg.position.set(.2,1,0);rLeg.castShadow=true;player.add(rLeg);
+  player.position.set(0,0,6);
+
+  // Controls
+  const keys={};
+  document.addEventListener("keydown",e=>{keys[e.code]=true;if(e.code==="Digit5"){fp=!fp;modeIndicator.textContent=fp?"FIRST PERSON":"THIRD PERSON";}});
+  document.addEventListener("keyup",e=>keys[e.code]=false);
+  let fp=true,wt=0,tgt=null;
+  const half=RW/2-1,spd=.15;
+
+  // Click marker
+  const cm=new THREE.Mesh(new THREE.RingGeometry(.2,.3,32),new THREE.MeshBasicMaterial({color:0x00ff88,side:THREE.DoubleSide}));
+  cm.rotation.x=-Math.PI/2;cm.position.y=.05;cm.visible=false;scene.add(cm);
+  const pmMat=new THREE.MeshBasicMaterial({color:0x00ff88,transparent:true,opacity:.5,side:THREE.DoubleSide});
+  const pr=new THREE.Mesh(new THREE.RingGeometry(.25,.32,32),pmMat);pr.rotation.x=-Math.PI/2;pr.position.y=.06;pr.visible=false;scene.add(pr);
+
+  // Drug panel + patient panel
+  const dp=document.getElementById("drugPanel");
+  const pp=document.getElementById("patientPanel");
+  const adminBtn=document.getElementById("adminBtn");
+  document.getElementById("closeDrug").onclick=()=>{dp.style.display="none";currentDrug=null;};
+  document.getElementById("closePatient").onclick=()=>{pp.style.display="none";};
+  document.getElementById("checkRegimenBtn").onclick=checkRegimen;
+
+  adminBtn.onclick=()=>{
+    if(currentDrug){
+      addToRegimen(currentDrug);
+      adminBtn.textContent="ADMINISTERED ✓";
+      adminBtn.classList.add("administered");
+    }
+  };
+
+  function showPatientChart(){
+    document.getElementById("ppPresenting").textContent=PATIENT.presenting;
+    document.getElementById("ppVitals").textContent=PATIENT.vitals;
+    document.getElementById("ppLabs").innerHTML=
+      `<span class="lab-val crit">HbA1c: ${PATIENT.hba1c} ↑↑</span>`+
+      `<span class="lab-val crit">FBG: ${PATIENT.fbg} ↑↑</span><br>`+
+      `<span class="lab-val crit">LDL: 158 ↑</span>`+
+      `<span class="lab-val crit">TG: 310 ↑↑</span>`+
+      `<span class="lab-val crit">HDL: 36 ↓</span><br>`+
+      `<span class="lab-val pos">C-peptide: ${PATIENT.cpeptide}</span>`;
+    document.getElementById("ppAb").innerHTML=
+      `<span class="lab-val low">GAD65 neg</span>`+
+      `<span class="lab-val low">IA-2 neg</span>`+
+      `<span style="color:#88aacc;font-size:10px;margin-left:6px;">→ Rules out T1DM / LADA</span>`;
+    document.getElementById("ppDx").textContent=PATIENT.dx;
+    document.getElementById("ppPlan").textContent=PATIENT.plan;
+    pp.style.display="block";
+    dp.style.display="none";currentDrug=null;
+  }
+
+  // Make billboard 2 (patient board) clickable
+  bill2.userData.isPatientBoard=true;
+  backing2.userData.isPatientBoard=true;
+  const clickableBoards=[bill2,backing2];
+
+  function showDrug(drug){
+    currentDrug=drug;
+    document.getElementById("dptitle").textContent=drug.name;
+    document.getElementById("dpclass").textContent=drug.cls;
+    document.getElementById("dpind").textContent=drug.ind;
+    document.getElementById("dpdose").textContent=drug.dose;
+    document.getElementById("dpse").innerHTML=drug.se.map(([t,w])=>`<span class="dtag ${w}">${t}</span>`).join('');
+    document.getElementById("dpmon").textContent=drug.mon;
+    document.getElementById("dpmech").textContent=drug.mech;
+    // Reset admin button state
+    const alreadyAdded=patientRegimen.find(d=>d.name===drug.name);
+    if(alreadyAdded){
+      adminBtn.textContent="ADMINISTERED ✓";
+      adminBtn.classList.add("administered");
+    }else{
+      adminBtn.textContent="ADMINISTER TO PATIENT";
+      adminBtn.classList.remove("administered");
+    }
+    dp.style.display="block";
+  }
+
+  const ray=new THREE.Raycaster();const mo=new THREE.Vector2();
+  let hoveredLabel=null;
+
+  window.addEventListener("mousedown",e=>{
+    if(e.target!==labCanvas)return;
+    mo.x=(e.clientX/innerWidth)*2-1;
+    mo.y=-(e.clientY/innerHeight)*2+1;
+    ray.setFromCamera(mo,camera);
+
+    // Check label clicks first
+    const lhits=ray.intersectObjects(labelMeshes);
+    if(lhits.length>0){pp.style.display="none";showDrug(lhits[0].object.userData.drug);return;}
+
+    // Check patient board click
+    const bhits=ray.intersectObjects(clickableBoards);
+    if(bhits.length>0){showPatientChart();return;}
+
+    dp.style.display="none";currentDrug=null;
+    pp.style.display="none";
+    const fhits=ray.intersectObject(floor);
+    if(fhits.length>0){
+      const pt=fhits[0].point;
+      const cx=Math.max(-half,Math.min(half,pt.x));
+      const cz=Math.max(-half,Math.min(half,pt.z));
+      tgt=new THREE.Vector3(cx,player.position.y,cz);
+      cm.position.x=cx;cm.position.z=cz;cm.visible=true;
+      pr.position.x=cx;pr.position.z=cz;pr.visible=true;
+    }
+  });
+
+  window.addEventListener("mousemove",e=>{
+    if(e.target!==labCanvas)return;
+    mo.x=(e.clientX/innerWidth)*2-1;mo.y=-(e.clientY/innerHeight)*2+1;
+    ray.setFromCamera(mo,camera);
+    const h=ray.intersectObjects(labelMeshes);
+    const bh=ray.intersectObjects(clickableBoards);
+    if(h.length>0){labCanvas.style.cursor="pointer";hoveredLabel=h[0].object;}
+    else if(bh.length>0){labCanvas.style.cursor="pointer";hoveredLabel=null;}
+    else{labCanvas.style.cursor="default";hoveredLabel=null;}
+  });
+
+  const tpOff=new THREE.Vector3(0,28,18);let tpPos=new THREE.Vector3().copy(player.position).add(tpOff);
+
+  function loop(){
+    requestAnimationFrame(loop);
+    let walk=false;
+    if(tgt){
+      const d=player.position.distanceTo(tgt);
+      if(d>.12){
+        const dir=new THREE.Vector3().subVectors(tgt,player.position).normalize();
+        player.position.addScaledVector(dir,spd);
+        let da=Math.atan2(dir.x,dir.z)-player.rotation.y;
+        while(da>Math.PI)da-=Math.PI*2;while(da<-Math.PI)da+=Math.PI*2;
+        player.rotation.y+=da*.15;walk=true;
+      }else{tgt=null;cm.visible=false;pr.visible=false;}
+    }
+    if(keys["KeyQ"])player.rotation.y+=.04;
+    if(keys["KeyE"])player.rotation.y-=.04;
+    player.position.x=Math.max(-half,Math.min(half,player.position.x));
+    player.position.z=Math.max(-half,Math.min(half,player.position.z));
+    if(walk){wt+=.25;lLeg.rotation.x=Math.sin(wt)*.7;rLeg.rotation.x=-Math.sin(wt)*.7;body.position.y=2.1+Math.abs(Math.sin(wt*2))*.02;}
+    else{lLeg.rotation.x=0;rLeg.rotation.x=0;body.position.y=2.1;}
+    if(pr.visible){const t=Date.now()*.003;pmMat.opacity=.3+Math.sin(t*4)*.25;const s=1+Math.sin(t*4)*.15;pr.scale.set(s,1,s);}
+
+    labelMeshes.forEach(m=>m.lookAt(camera.position));
+    const t2=Date.now()*.001;
+    labelMeshes.forEach(m=>{
+      const isHov=m===hoveredLabel;
+      m.material.opacity=isHov?1:.92+Math.sin(t2*1.5+m.position.x)*.08;
+    });
+
+    if(fp){
+      const eye=new THREE.Vector3(0,3.35,0).applyQuaternion(player.quaternion).add(player.position);
+      camera.position.copy(eye);
+      camera.lookAt(eye.clone().add(new THREE.Vector3(0,0,1).applyQuaternion(player.quaternion)));
+    }else{
+      tpPos.lerp(player.position.clone().add(tpOff),.08);
+      camera.position.copy(tpPos);camera.lookAt(player.position);
+    }
+    const t3=Date.now()*.001;
+    scene.children.forEach(c=>{if(c.isPointLight&&c.color.b>.8)c.intensity=.8+Math.sin(t3*60+c.position.x)*.01;});
+    renderer.render(scene,camera);
+  }
+  loop();
+
+  window.addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+}
+window.addEventListener("resize",()=>{eCam.aspect=innerWidth/innerHeight;eCam.updateProjectionMatrix();eRend.setSize(innerWidth,innerHeight);});
+</script>
+</body>
+</html>
