@@ -16,6 +16,11 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../../public')));
 
+// ── ROOT redirect → portal.html ───────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.redirect('/portal.html');
+});
+
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const APIFY_TOKEN = 'apify_api_C7106vkfqnIYd7vzjdhcuyMPJ4CPyd0wY0tl';
 const SKETCHFAB_TOKEN = '417dc58517b4449aa0f15348fc16ae2a';
@@ -232,6 +237,13 @@ app.get('/api/asset', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n✅ MedLab proxy running at http://localhost:${PORT}\n`);
-});
+  const url = `http://localhost:${PORT}/portal.html`;
+  console.log(`\n✅ MedLab proxy running at ${url}\n`);
 
+  // Auto-open the browser on Windows/Mac/Linux
+  const { exec } = require('child_process');
+  const cmd = process.platform === 'win32' ? `start ${url}`
+    : process.platform === 'darwin' ? `open ${url}`
+      : `xdg-open ${url}`;
+  exec(cmd, err => { if (err) console.log(`Open manually: ${url}`); });
+});
