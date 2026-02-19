@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>3D Lab Simulation</title>
+  <title>MedLab 3D — Type 2 Diabetes</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
 
@@ -47,6 +47,14 @@
       color: #00e5ff88;
       font-size: 13px;
       letter-spacing: 4px;
+      margin-bottom: 6px;
+    }
+
+    #menu .sub {
+      font-family: 'Share Tech Mono', monospace;
+      color: #ff884488;
+      font-size: 11px;
+      letter-spacing: 3px;
       margin-bottom: 40px;
     }
 
@@ -191,15 +199,419 @@
       position: absolute;
       inset: 0;
     }
+
+    #drugPanel {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 24px;
+      transform: translateY(-50%);
+      width: 320px;
+      background: #020810f2;
+      backdrop-filter: blur(18px);
+      border: 1px solid #00e5ff44;
+      border-radius: 10px;
+      z-index: 20;
+      font-family: 'Share Tech Mono', monospace;
+      box-shadow: 0 0 40px #00e5ff22, 0 20px 60px #000000bb;
+      overflow: hidden;
+    }
+
+    #dph {
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid #00e5ff22;
+      background: linear-gradient(135deg, #001a2a, #0a0520);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    #dptitle {
+      color: #00e5ff;
+      font-size: 14px;
+      letter-spacing: 3px;
+      font-weight: bold;
+    }
+
+    #dpclass {
+      color: #00e5ff66;
+      font-size: 9px;
+      letter-spacing: 2px;
+      margin-top: 3px;
+    }
+
+    #closeDrug {
+      background: none;
+      border: none;
+      color: #00e5ff44;
+      font-size: 16px;
+      cursor: pointer;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+
+    #closeDrug:hover {
+      color: #00e5ff;
+    }
+
+    #dpbody {
+      padding: 14px 18px;
+    }
+
+    .ds {
+      color: #00e5ff66;
+      font-size: 9px;
+      letter-spacing: 3px;
+      margin: 10px 0 5px;
+    }
+
+    .ds:first-child {
+      margin-top: 0;
+    }
+
+    .dd {
+      color: #c0e0ff;
+      font-size: 11px;
+      line-height: 1.65;
+    }
+
+    .dtag {
+      display: inline-block;
+      background: #00e5ff15;
+      border: 1px solid #00e5ff33;
+      color: #00e5ffcc;
+      font-size: 9px;
+      letter-spacing: 1px;
+      padding: 2px 7px;
+      border-radius: 3px;
+      margin: 2px 2px 2px 0;
+    }
+
+    .dtag.w {
+      background: #ff6b6b15;
+      border-color: #ff6b6b44;
+      color: #ffaaaa;
+    }
+
+    #dpmech {
+      padding: 10px 18px 14px;
+      border-top: 1px solid #00e5ff11;
+      color: #9988cc;
+      font-size: 10px;
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    #dpActions {
+      padding: 0 18px 14px;
+      display: flex;
+      gap: 8px;
+    }
+
+    #dpActions button {
+      flex: 1;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      padding: 8px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    #adminBtn {
+      background: linear-gradient(135deg, #00b8d4, #006688);
+      color: white;
+      border: 1px solid #00e5ff66;
+      box-shadow: 0 0 12px #00e5ff33;
+    }
+
+    #adminBtn:hover {
+      box-shadow: 0 0 20px #00e5ff66;
+      transform: translateY(-1px);
+    }
+
+    #adminBtn.administered {
+      background: linear-gradient(135deg, #005500, #228833);
+      border-color: #44ff8866;
+      box-shadow: 0 0 12px #44ff8833;
+      pointer-events: none;
+    }
+
+    #regimenPanel {
+      display: none;
+      position: absolute;
+      top: 20px;
+      left: 24px;
+      width: 280px;
+      background: #020810ee;
+      backdrop-filter: blur(18px);
+      border: 1px solid #00e5ff33;
+      border-radius: 10px;
+      z-index: 20;
+      font-family: 'Share Tech Mono', monospace;
+      box-shadow: 0 0 30px #00000088;
+      overflow: hidden;
+    }
+
+    #regimenPanel .rp-head {
+      padding: 12px 16px 10px;
+      border-bottom: 1px solid #00e5ff22;
+      background: linear-gradient(135deg, #0a1a2a, #100820);
+    }
+
+    #regimenPanel .rp-title {
+      color: #00e5ff;
+      font-size: 12px;
+      letter-spacing: 3px;
+      font-weight: bold;
+    }
+
+    #regimenPanel .rp-sub {
+      color: #00e5ff55;
+      font-size: 9px;
+      letter-spacing: 2px;
+      margin-top: 2px;
+    }
+
+    #regimenPanel .rp-body {
+      padding: 10px 16px 14px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .regimen-item {
+      padding: 6px 0;
+      border-bottom: 1px solid #ffffff08;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .regimen-item .ri-name {
+      color: #c0e0ff;
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+
+    .regimen-item .ri-dose {
+      color: #00e5ff88;
+      font-size: 9px;
+    }
+
+    .regimen-item .ri-remove {
+      background: none;
+      border: 1px solid #ff6b6b33;
+      color: #ff6b6b88;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .regimen-item .ri-remove:hover {
+      border-color: #ff6b6b;
+      color: #ff6b6b;
+    }
+
+    .rp-empty {
+      color: #ffffff33;
+      font-size: 10px;
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    #regimenFeedback {
+      padding: 8px 16px 12px;
+      border-top: 1px solid #00e5ff11;
+      font-size: 10px;
+      line-height: 1.5;
+      color: #88aacc;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    #checkRegimenBtn {
+      margin: 0 16px 12px;
+      padding: 8px;
+      width: calc(100% - 32px);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #6200ea, #9c27b0);
+      color: white;
+      border: 1px solid #bb86fc55;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    #checkRegimenBtn:hover {
+      box-shadow: 0 0 16px #bb86fc44;
+      transform: translateY(-1px);
+    }
+
+    #toast {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #020810ee;
+      border: 1px solid #44ff8844;
+      color: #88ffaa;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 2px;
+      padding: 10px 28px;
+      border-radius: 6px;
+      z-index: 30;
+      display: none;
+      box-shadow: 0 0 20px #44ff8833;
+      animation: toastIn .3s ease;
+    }
+
+    #toast.error {
+      border-color: #ff6b6b44;
+      color: #ffaaaa;
+      box-shadow: 0 0 20px #ff6b6b33;
+    }
+
+    #toast.warning {
+      border-color: #ffaa4444;
+      color: #ffcc88;
+      box-shadow: 0 0 20px #ffaa4433;
+    }
+
+    #patientPanel {
+      display: none;
+      position: absolute;
+      top: 50%;
+      right: 24px;
+      transform: translateY(-50%);
+      width: 380px;
+      max-height: 85vh;
+      background: #0a0410f4;
+      backdrop-filter: blur(18px);
+      border: 1px solid #ff884466;
+      border-radius: 10px;
+      z-index: 20;
+      font-family: 'Share Tech Mono', monospace;
+      box-shadow: 0 0 40px #ff884422, 0 20px 60px #000000bb;
+      overflow: hidden;
+    }
+
+    #pph {
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid #ff884422;
+      background: linear-gradient(135deg, #1a0a00, #200810);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    #pptitle {
+      color: #ff8844;
+      font-size: 14px;
+      letter-spacing: 3px;
+      font-weight: bold;
+    }
+
+    #ppsubtitle {
+      color: #ff884466;
+      font-size: 9px;
+      letter-spacing: 2px;
+      margin-top: 3px;
+    }
+
+    #closePatient {
+      background: none;
+      border: none;
+      color: #ff884444;
+      font-size: 16px;
+      cursor: pointer;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+
+    #closePatient:hover {
+      color: #ff8844;
+    }
+
+    #ppbody {
+      padding: 14px 18px;
+      overflow-y: auto;
+      max-height: calc(85vh - 60px);
+    }
+
+    #ppbody .ds {
+      color: #ff884466;
+      font-size: 9px;
+      letter-spacing: 3px;
+      margin: 12px 0 5px;
+    }
+
+    #ppbody .ds:first-child {
+      margin-top: 0;
+    }
+
+    #ppbody .dd {
+      color: #ddc8b0;
+      font-size: 11px;
+      line-height: 1.65;
+    }
+
+    .lab-val {
+      display: inline-block;
+      margin: 2px 2px 2px 0;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+
+    .lab-val.crit {
+      background: #ff444418;
+      border: 1px solid #ff444444;
+      color: #ffaaaa;
+    }
+
+    .lab-val.low {
+      background: #4488ff18;
+      border: 1px solid #4488ff44;
+      color: #aaccff;
+    }
+
+    .lab-val.pos {
+      background: #ff884418;
+      border: 1px solid #ff884444;
+      color: #ffcc88;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
   </style>
 </head>
 
 <body>
   <div id="entryOverlay"></div>
   <canvas id="labCanvas"></canvas>
+
   <div id="menu">
     <h1>MedLab 3D</h1>
     <p>VIRTUAL SIMULATION ENVIRONMENT</p>
+    <div class="sub">TYPE 2 DIABETES MELLITUS</div>
     <button class="btn btn-primary" id="playBtn"><span>Enter Lab</span></button>
   </div>
   <div id="labOptions" style="display:none;">
@@ -211,80 +623,332 @@
     <button class="btn btn-primary" id="skipBtn"><span>Skip → Enter Lab</span></button>
   </div>
   <div id="hud">
-    <span><span class="key">Click</span> Move</span>
-    <span><span class="key">Q/E</span> Turn</span>
+    <span><span class="key">Click Floor</span> Move</span>
+    <span><span class="key">Q / E</span> Turn</span>
     <span><span class="key">5</span> Toggle View</span>
+    <span><span class="key">Click Label</span> Inspect Drug</span>
+    <span><span class="key">Click Board</span> Patient Chart</span>
   </div>
   <div id="modeIndicator">FIRST PERSON</div>
+
+  <div id="drugPanel">
+    <div id="dph">
+      <div>
+        <div id="dptitle">—</div>
+        <div id="dpclass">—</div>
+      </div>
+      <button id="closeDrug">✕</button>
+    </div>
+    <div id="dpbody">
+      <div class="ds">INDICATION</div>
+      <div class="dd" id="dpind">—</div>
+      <div class="ds">DOSAGE</div>
+      <div class="dd" id="dpdose">—</div>
+      <div class="ds">SIDE EFFECTS</div>
+      <div id="dpse">—</div>
+      <div class="ds">MONITORING</div>
+      <div class="dd" id="dpmon">—</div>
+    </div>
+    <div id="dpmech">—</div>
+    <div id="dpActions">
+      <button id="adminBtn">ADMINISTER TO PATIENT</button>
+    </div>
+  </div>
+
+  <div id="regimenPanel">
+    <div class="rp-head">
+      <div class="rp-title">PATIENT REGIMEN</div>
+      <div class="rp-sub">T2DM — 54yr M — New Dx + CVD risk</div>
+    </div>
+    <div class="rp-body" id="regimenBody">
+      <div class="rp-empty">No drugs administered yet</div>
+    </div>
+    <button id="checkRegimenBtn">CHECK REGIMEN</button>
+    <div id="regimenFeedback"></div>
+  </div>
+
+  <div id="toast"></div>
+
+  <div id="patientPanel">
+    <div id="pph">
+      <div>
+        <div id="pptitle">PATIENT CHART</div>
+        <div id="ppsubtitle">ROBERT J. · 54yr M · T2DM New Dx</div>
+      </div>
+      <button id="closePatient">✕</button>
+    </div>
+    <div id="ppbody">
+      <div class="ds">PRESENTING COMPLAINT</div>
+      <div class="dd" id="ppPresenting"></div>
+      <div class="ds">VITALS</div>
+      <div class="dd" id="ppVitals"></div>
+      <div class="ds">KEY LABS</div>
+      <div id="ppLabs"></div>
+      <div class="ds">AUTOANTIBODIES</div>
+      <div class="dd" id="ppAb"></div>
+      <div class="ds">DIAGNOSIS</div>
+      <div class="dd" id="ppDx"></div>
+      <div class="ds">MANAGEMENT PLAN</div>
+      <div class="dd" id="ppPlan" style="white-space:pre-line;"></div>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
-    const menu = document.getElementById("menu");
-    const labOptions = document.getElementById("labOptions");
-    const labCanvas = document.getElementById("labCanvas");
-    const hud = document.getElementById("hud");
-    const modeIndicator = document.getElementById("modeIndicator");
+    // ─── TYPE 2 DIABETES DRUG DATA ─────────────────────────────────
+    const DRUGS = [
+      {
+        name: "METFORMIN", cls: "BIGUANIDE · FIRST-LINE T2DM", col: 0x226644, lc: "#44cc88", category: "first_line", correct: true,
+        ind: "T2DM first-line per ADA/EASD. Reduces hepatic glucose output. Weight-neutral to modest loss. No hypoglycemia as monotherapy.",
+        dose: "Start 500 mg PO daily with dinner. Titrate by 500 mg/wk to max 2000 mg/day divided. Extended-release if GI intolerant.",
+        se: [["GI upset (nausea, diarrhea, bloating)", "w"], ["Lactic acidosis (very rare, CI if eGFR <30)", "w"], ["B12 deficiency (check annually)", "w"], ["Metallic taste", ""]],
+        mon: "HbA1c q3–6mo. eGFR annually (hold if <30, caution 30–45). Vitamin B12 annually. LFTs baseline.",
+        mech: "Activates AMPK → suppresses hepatic gluconeogenesis. Improves peripheral insulin sensitivity. No insulin secretion stimulation → no hypoglycemia alone. CV safety proven, low cost."
+      },
+      {
+        name: "EMPAGLIFLOZIN", cls: "SGLT-2 INHIBITOR (JARDIANCE)", col: 0x226633, lc: "#44dd88", category: "sglt2", correct: true,
+        ind: "T2DM with CVD or high CV risk — EMPA-REG showed 38% ↓CV death. Renoprotective. This patient: HTN, dyslipidemia, microalbuminuria, family Hx MI.",
+        dose: "10 mg PO once daily AM. May increase to 25 mg. Effective for glycemia until eGFR <20.",
+        se: [["Genital mycotic infections (candida)", "w"], ["UTI", ""], ["Volume depletion / hypotension", "w"], ["Euglycemic DKA (rare in T2DM)", "w"], ["Fournier's gangrene (very rare)", "w"]],
+        mon: "eGFR (CI <20 for glycemic effect). BP. Genital hygiene. Ketones if acutely ill. Volume status.",
+        mech: "Blocks renal SGLT-2 → glucosuria (~70g/day) + natriuresis → lowers BG, BP, weight. ↓Intraglomerular pressure → nephroprotection. Proven CV mortality benefit."
+      },
+      {
+        name: "SEMAGLUTIDE", cls: "GLP-1 RECEPTOR AGONIST (OZEMPIC)", col: 0x993311, lc: "#ff7744", category: "glp1", correct: true,
+        ind: "T2DM with obesity (BMI 34) and CVD risk. SUSTAIN-6 showed CV benefit. Weight loss 8–14%. HbA1c ↓1.5–1.8%.",
+        dose: "0.25 mg SC weekly ×4wk → 0.5 mg weekly → may ↑ to 1 mg then 2 mg based on response and tolerance.",
+        se: [["Nausea/vomiting (dose-dependent, transient)", "w"], ["Pancreatitis (rare)", "w"], ["Thyroid C-cell tumors (rodents; MEN2/MTC CI)", "w"], ["Gallbladder disease", ""], ["Appetite suppression", ""]],
+        mon: "HbA1c q3mo. Weight. GI tolerance during titration. Thyroid history. Amylase/lipase if abdominal pain.",
+        mech: "GLP-1 RA → glucose-dependent insulin secretion + glucagon suppression + delayed gastric emptying + central appetite reduction. CV benefit beyond glycemia. Major weight loss effect."
+      },
+      {
+        name: "ATORVASTATIN", cls: "HMG-CoA REDUCTASE INHIBITOR (STATIN)", col: 0x334488, lc: "#6688dd", category: "statin", correct: true,
+        ind: "All T2DM age 40–75 should receive statin (ADA). This patient: LDL 158, TG 310, family Hx MI at 58. High-intensity statin indicated.",
+        dose: "40–80 mg PO daily at bedtime. High-intensity indicated (diabetes + multiple CV risk factors).",
+        se: [["Myalgia (common, usually tolerable)", ""], ["Hepatotoxicity (rare, check LFTs)", "w"], ["New-onset diabetes (already diabetic)", ""], ["Rhabdomyolysis (very rare)", "w"]],
+        mon: "Lipid panel baseline → 4–12 wk → annually. LFTs baseline. CK only if symptomatic myalgia.",
+        mech: "Inhibits HMG-CoA reductase → ↓hepatic cholesterol → ↑LDL receptor → ↓serum LDL. Pleiotropic: plaque stabilization, anti-inflammatory, endothelial function."
+      },
+      {
+        name: "LISINOPRIL", cls: "ACE INHIBITOR · RENOPROTECTION", col: 0x553388, lc: "#9966cc", category: "acei", correct: true,
+        ind: "T2DM with HTN (BP 148/92) AND microalbuminuria (UACR 68). ACEi = first-line antihypertensive in diabetic kidney disease. Target BP <130/80.",
+        dose: "Start 10 mg PO daily. Titrate to 20–40 mg. Target BP <130/80.",
+        se: [["Dry cough (10–15%)", ""], ["Hyperkalemia", "w"], ["Angioedema (rare, life-threatening)", "w"], ["AKI (check Cr after starting)", "w"], ["Teratogenic — CI in pregnancy", "w"]],
+        mon: "BMP 1–2 wk after initiation (Cr + K⁺). BP. UACR annually. Accept up to 30% Cr rise.",
+        mech: "Inhibits ACE → ↓angiotensin II → vasodilation + ↓aldosterone. Dilates efferent arteriole → ↓intraglomerular pressure → slows diabetic nephropathy. BP + renal protection."
+      },
+      {
+        name: "LOW-DOSE ASPIRIN", cls: "ANTIPLATELET · CV PREVENTION", col: 0x884444, lc: "#cc7777", category: "aspirin", correct: true,
+        ind: "T2DM with elevated ASCVD risk (>10% 10yr). ADA: consider aspirin for primary prevention if ASCVD risk >10% without increased bleeding risk.",
+        dose: "81 mg PO daily with food.",
+        se: [["GI bleeding", "w"], ["Bruising", ""], ["Aspirin-exacerbated resp. disease", ""], ["Reye syndrome (CI children)", "w"]],
+        mon: "GI bleeding signs. Concurrent NSAID use. Bleeding risk.",
+        mech: "Irreversibly inhibits COX-1 → ↓thromboxane A2 → ↓platelet aggregation for platelet lifetime (7–10 days). Reduces atherothrombotic events."
+      },
+      {
+        name: "INSULIN GLARGINE", cls: "LONG-ACTING BASAL INSULIN", col: 0x884400, lc: "#ffaa44", category: "trap_insulin", correct: false,
+        penalty: "Insulin is NOT first-line for newly diagnosed T2DM with HbA1c 9.2%. ADA: start metformin + lifestyle ± second oral/injectable agent. Insulin reserved for HbA1c >10%, catabolic symptoms, or oral agent failure. Premature insulin adds hypoglycemia + weight gain.",
+        ind: "T2DM when oral agents fail, HbA1c >10% on max therapy, or catabolic symptoms. Not first-line for new T2DM with HbA1c 9.2%.",
+        dose: "0.1–0.2 U/kg/day SC once daily. Titrate to fasting BG 80–130.",
+        se: [["Hypoglycemia", "w"], ["Weight gain (2–4 kg)", "w"], ["Injection site lipodystrophy", ""], ["Hypokalemia", ""]],
+        mon: "Fasting glucose daily. HbA1c q3mo. Weight.",
+        mech: "Exogenous basal insulin. Appropriate for T2DM only after oral agent failure or HbA1c >10%. This patient's 9.2% warrants aggressive oral combination therapy first."
+      },
+      {
+        name: "GLIPIZIDE", cls: "SULFONYLUREA (2ND GEN)", col: 0x887722, lc: "#ddcc44", category: "trap_su", correct: false,
+        penalty: "Sulfonylureas cause weight gain (patient already BMI 34) and significant hypoglycemia. NO CV benefit — may increase CV risk. With SGLT2i and GLP-1 RA available offering weight loss + CV protection, SUs are inferior per ADA/EASD for obese patients with CV risk.",
+        ind: "T2DM — older, cheaper. Avoided in obesity + CV risk due to weight gain + hypoglycemia. No CV or renal benefit.",
+        dose: "5 mg daily before breakfast. Max 40 mg/day.",
+        se: [["Hypoglycemia (significant, especially elderly/CKD)", "w"], ["Weight gain (2–5 kg)", "w"], ["Agranulocytosis (rare)", "w"]],
+        mon: "BG, HbA1c, weight, renal function. Hypo education.",
+        mech: "Binds SUR1 → K-ATP closure → β-cell depolarisation → insulin release (glucose-independent). Weight gain + hypo risk. No CV benefit. Inferior to GLP-1 RA/SGLT2i here."
+      },
+      {
+        name: "PIOGLITAZONE", cls: "THIAZOLIDINEDIONE (TZD)", col: 0x115566, lc: "#33aacc", category: "trap_tzd", correct: false,
+        penalty: "TZDs cause 4–6 kg weight gain and fluid retention — dangerous for this obese patient with CV risk factors. Increase heart failure risk. Also increase bone fracture risk. SGLT2i and GLP-1 RA offer weight LOSS + CV PROTECTION instead.",
+        ind: "T2DM insulin resistance. Avoided with HF risk, obesity, osteoporosis. Largely replaced by safer alternatives.",
+        dose: "15–45 mg PO daily.",
+        se: [["Fluid retention / edema", "w"], ["Weight gain (4–6 kg)", "w"], ["Heart failure (NYHA III–IV CI)", "w"], ["Bone fractures", "w"], ["Bladder cancer concern", ""]],
+        mon: "LFTs, weight, edema, cardiac status, bone density.",
+        mech: "PPAR-γ agonist → ↑insulin sensitivity. But fluid retention, weight gain, HF risk = poor choice vs SGLT2i/GLP-1 RA which give CV benefit WITH weight loss."
+      },
+      {
+        name: "CHLORPROPAMIDE", cls: "SULFONYLUREA (1ST GEN) · OBSOLETE", col: 0x665533, lc: "#aa8855", category: "trap_old_su", correct: false,
+        penalty: "First-generation sulfonylurea — essentially obsolete. 36hr half-life causes prolonged dangerous hypoglycemia, especially in elderly/CKD. Causes SIADH/hyponatremia. Disulfiram-like reaction with alcohol. Should never be prescribed in modern practice.",
+        ind: "Historically used for T2DM. Now OBSOLETE — replaced by safer agents.",
+        dose: "100–500 mg PO daily (historical).",
+        se: [["Severe prolonged hypoglycemia (36hr half-life)", "w"], ["SIADH / hyponatremia", "w"], ["Disulfiram-like reaction with alcohol", "w"], ["Weight gain", "w"]],
+        mon: "Not applicable — should not be prescribed.",
+        mech: "SU mechanism (K-ATP closure → insulin release) but 36hr half-life → unpredictable prolonged hypoglycemia. Prescribing this is a medical error."
+      },
+      {
+        name: "GLYBURIDE", cls: "SULFONYLUREA · HIGH HYPO RISK", col: 0x776633, lc: "#bbaa55", category: "trap_glyburide", correct: false,
+        penalty: "Glyburide has the HIGHEST hypoglycemia risk of all sulfonylureas — active metabolites accumulate in renal impairment (this patient's eGFR 68). Associated with worse CV outcomes vs other SUs. Avoided when safer alternatives exist.",
+        ind: "T2DM — older agent. Highest hypo risk among SUs. Avoid in elderly, CKD, and when SGLT2i/GLP-1 RA available.",
+        dose: "2.5–20 mg PO daily.",
+        se: [["Severe hypoglycemia (worst among SUs)", "w"], ["Weight gain", "w"], ["Active metabolites in CKD", "w"]],
+        mon: "BG frequently. Renal function. Weight.",
+        mech: "Potent long-acting SU with active metabolites accumulating in renal impairment. Patient's eGFR 68 makes accumulation likely. Higher hypo risk than glipizide/glimepiride."
+      },
+      {
+        name: "ACARBOSE", cls: "ALPHA-GLUCOSIDASE INHIBITOR", col: 0x336655, lc: "#55bb99", category: "trap_agi", correct: false,
+        penalty: "Acarbose has very modest HbA1c reduction (0.5–0.8%) vs metformin (1–1.5%), GLP-1 RA (1.5–1.8%), or SGLT2i (0.7–1.0%). With HbA1c 9.2%, this patient needs potent agents. Significant GI side effects. No CV or renal benefit.",
+        ind: "T2DM adjunct for postprandial hyperglycemia. Weak efficacy. Rarely used when better options available.",
+        dose: "25 mg TID with first bite of meals. Titrate to 100 mg TID.",
+        se: [["Flatulence (very common, often intolerable)", "w"], ["Diarrhea", "w"], ["Abdominal bloating", "w"], ["↑LFTs at high doses", ""]],
+        mon: "HbA1c, postprandial glucose, LFTs.",
+        mech: "Inhibits intestinal α-glucosidase → slows carb digestion → blunts postprandial spike. Weak HbA1c reduction. No CV/renal benefit. Inadequate for HbA1c 9.2%."
+      }
+    ];
 
-    // ── ENTRY SCENE ──────────────────────────────────────────────────────────────
-    const entryScene = new THREE.Scene();
-    entryScene.background = new THREE.Color(0x050a12);
-    entryScene.fog = new THREE.Fog(0x050a12, 10, 40);
-    const entryCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    entryCamera.position.z = 10;
-    const entryRenderer = new THREE.WebGLRenderer({ canvas: labCanvas, antialias: true });
-    entryRenderer.setSize(window.innerWidth, window.innerHeight);
-    entryRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    const pGeo = new THREE.BufferGeometry();
-    const pArr = new Float32Array(600);
-    for (let i = 0; i < 600; i++) pArr[i] = (Math.random() - .5) * 30;
-    pGeo.setAttribute('position', new THREE.BufferAttribute(pArr, 3));
-    entryScene.add(new THREE.Points(pGeo, new THREE.PointsMaterial({ color: 0x00e5ff, size: 0.08, transparent: true, opacity: 0.7 })));
-    for (let i = 0; i < 3; i++) {
-      const t = new THREE.Mesh(new THREE.TorusGeometry(2 + i * 1.5, 0.04, 8, 80), new THREE.MeshBasicMaterial({ color: i === 0 ? 0x00e5ff : i === 1 ? 0x7c4dff : 0x00b8d4, transparent: true, opacity: 0.5 - i * 0.1 }));
-      t.rotation.x = Math.PI / 3 * i; t.rotation.z = Math.PI / 4 * i;
-      t.userData.speed = 0.003 + i * 0.002;
-      t.userData.axis = new THREE.Vector3(Math.random(), Math.random(), Math.random()).normalize();
-      entryScene.add(t);
+    // ─── PATIENT DATA ──────────────────────────────────────────────
+    const PATIENT = {
+      name: "ROBERT J.", age: 54, sex: "M", dx: "Newly Diagnosed Type 2 Diabetes Mellitus",
+      hba1c: "9.2%", fbg: "218 mg/dL", cpeptide: "3.8 ng/mL (elevated — insulin resistance)",
+      antibodies: "GAD65 neg, IA-2 neg (rules out T1DM/LADA)",
+      lipids: "TC 248, LDL 158, HDL 36, TG 310",
+      presenting: "6-month history: fatigue, increased thirst, nocturia ×3/night, blurred vision, tingling in feet. Slow-healing cut on left shin. Found on routine labs: FBG 218, HbA1c 9.2%.",
+      vitals: "HR 82, BP 148/92, RR 16, T 36.8°C, BMI 34.2, Waist 112 cm",
+      comorbid: "HTN (uncontrolled), Dyslipidemia, Obesity Class I, Microalbuminuria (UACR 68 mg/g), eGFR 68, FHx: father MI age 58, mother T2DM",
+      plan: "1) Lifestyle: MNT + 150 min/wk exercise\n2) Metformin 500 mg → titrate to 2000 mg\n3) Add SGLT-2i or GLP-1 RA (CV risk)\n4) High-intensity statin (LDL 158)\n5) ACEi for BP + renoprotection\n6) Low-dose aspirin (ASCVD risk >10%)\n7) Foot exam, ophthalmology, diabetes ed."
+    };
+
+    const SYMPTOMS = {
+      t2: ["Often asymptomatic for years — insidious onset", "Fatigue, polyuria, polydipsia (osmotic)", "Blurred vision — lens swelling from hyperglycemia", "Recurrent infections — candida, UTI, skin", "Slow wound healing, neuropathy (tingling/numbness)", "Acanthosis nigricans — velvety darkening at skin folds"],
+      path: ["Insulin resistance (muscle, liver, adipose)", "Progressive β-cell dysfunction / exhaustion", "Hepatic glucose overproduction (↑gluconeogenesis)", "↓Incretin effect (GLP-1 response blunted)", "↑Glucagon from α-cells (paradoxical)", "Genetic predisposition + obesity + inactivity"],
+      mgmt: ["Lifestyle: weight loss 5–10%, 150 min/wk exercise", "Metformin — first-line (ADA/EASD consensus)", "SGLT-2i or GLP-1 RA if CVD, CKD, or HF", "Statin for CV protection (nearly all T2DM >40yr)", "ACEi/ARB if HTN or albuminuria", "HbA1c target <7% (individualize for age/comorbid)"]
+    };
+
+    // ─── REGIMEN SYSTEM ────────────────────────────────────────────
+    let patientRegimen = [];
+    let currentDrug = null;
+
+    function addToRegimen(drug) {
+      if (patientRegimen.find(d => d.name === drug.name)) { showToast(drug.name + " already prescribed", "error"); return; }
+      patientRegimen.push(drug);
+      updateRegimenUI();
+      if (drug.correct === false) { showToast(drug.name + " prescribed — are you sure?", "warning"); }
+      else { showToast(drug.name + " prescribed ✓", "success"); }
     }
-    entryScene.add(new THREE.AmbientLight(0x00e5ff, 0.2));
-    let entryRunning = true;
-    function animateEntry() {
-      if (!entryRunning) return;
-      requestAnimationFrame(animateEntry);
-      const t = Date.now() * 0.001;
-      entryScene.children.forEach(o => { if (o.userData.axis) o.rotateOnAxis(o.userData.axis, o.userData.speed); });
-      entryCamera.position.x = Math.sin(t * 0.1) * 2;
-      entryCamera.position.y = Math.cos(t * 0.07) * 1;
-      entryCamera.lookAt(0, 0, 0);
-      entryRenderer.render(entryScene, entryCamera);
+
+    function removeFromRegimen(name) {
+      patientRegimen = patientRegimen.filter(d => d.name !== name);
+      updateRegimenUI();
     }
-    animateEntry();
 
-    document.getElementById("playBtn").addEventListener("click", () => { menu.style.display = "none"; labOptions.style.display = "block"; });
-    document.getElementById("notesBtn").addEventListener("click", () => { const n = prompt("Insert your note:"); if (n) alert("Note saved: " + n); });
-    const fileInput = document.getElementById("fileInput");
-    document.getElementById("filesBtn").addEventListener("click", () => fileInput.click());
-    fileInput.addEventListener("change", e => { if (e.target.files.length > 0) { labOptions.style.display = "none"; entryRunning = false; startLabSimulation(); } });
-    document.getElementById("skipBtn").addEventListener("click", () => { labOptions.style.display = "none"; entryRunning = false; startLabSimulation(); });
+    function updateRegimenUI() {
+      const body = document.getElementById("regimenBody");
+      const fb = document.getElementById("regimenFeedback");
+      fb.innerHTML = '';
+      if (patientRegimen.length === 0) { body.innerHTML = '<div class="rp-empty">No drugs prescribed yet</div>'; return; }
+      body.innerHTML = patientRegimen.map(d => {
+        const isWrong = d.correct === false;
+        const nameCol = isWrong ? '#ffaa88' : '#c0e0ff';
+        const catLabel = isWrong ? '⚠ ' + d.cls.split('·')[0].trim() : d.category.toUpperCase();
+        const catCol = isWrong ? '#ff886688' : '#00e5ff88';
+        return `<div class="regimen-item" style="${isWrong ? 'border-left:2px solid #ff664488;padding-left:6px;' : ''}">
+      <div><div class="ri-name" style="color:${nameCol}">${d.name}</div><div class="ri-dose" style="color:${catCol}">${catLabel}</div></div>
+      <button class="ri-remove" onclick="removeFromRegimen('${d.name}')">✕</button>
+    </div>`;
+      }).join('');
+    }
 
-    // ── TEXTURE FACTORIES ────────────────────────────────────────────────────────
+    function checkRegimen() {
+      const fb = document.getElementById("regimenFeedback");
+      let msgs = [], score = 0, penalties = 0;
+      const wrongDrugs = patientRegimen.filter(d => d.correct === false);
+      const correctDrugs = patientRegimen.filter(d => d.correct === true);
+      wrongDrugs.forEach(d => { msgs.push('✗ ' + d.name + ' — ' + d.penalty); penalties += 12; });
+      const cats = correctDrugs.map(d => d.category);
+      const hasMetformin = cats.includes("first_line");
+      const hasSGLT2 = cats.includes("sglt2");
+      const hasGLP1 = cats.includes("glp1");
+      const hasStatin = cats.includes("statin");
+      const hasACEi = cats.includes("acei");
+      const hasAspirin = cats.includes("aspirin");
+      if (hasMetformin) { msgs.push('✓ Metformin — first-line T2DM therapy per ADA/EASD'); score += 20; }
+      else msgs.push('✗ MISSING metformin — first-line for all T2DM without contraindication');
+      if (hasSGLT2) { msgs.push('✓ SGLT-2 inhibitor — CV + renal benefit for high-risk patient'); score += 15; }
+      if (hasGLP1) { msgs.push('✓ GLP-1 RA — CV benefit + weight loss for obese patient'); score += 15; }
+      if (!hasSGLT2 && !hasGLP1) msgs.push('✗ MISSING SGLT-2i or GLP-1 RA — patient has CVD risk requiring cardioprotective agent');
+      if (hasStatin) { msgs.push('✓ Statin — essential, LDL 158 needs high-intensity therapy'); score += 15; }
+      else msgs.push('✗ MISSING statin — ADA recommends for nearly all T2DM age >40');
+      if (hasACEi) { msgs.push('✓ ACE inhibitor — BP + renoprotection (UACR 68, eGFR 68)'); score += 15; }
+      else msgs.push('✗ MISSING ACEi/ARB — HTN 148/92 + microalbuminuria needs treatment');
+      if (hasAspirin) { msgs.push('✓ Low-dose aspirin — appropriate for elevated ASCVD risk'); score += 10; }
+      else msgs.push('⚠ Consider aspirin — ASCVD risk >10%');
+      if (hasMetformin && (hasSGLT2 || hasGLP1) && hasStatin && hasACEi) score += 5;
+      score = Math.max(0, score - penalties);
+      const maxPossible = 95;
+      let grade, gradeCol;
+      if (wrongDrugs.length >= 3) { grade = 'DANGEROUS PRESCRIBING'; gradeCol = '#ff0000'; }
+      else if (wrongDrugs.length > 0 && score < 40) { grade = 'HARMFUL REGIMEN'; gradeCol = '#ff2222'; }
+      else if (wrongDrugs.length > 0) { grade = 'ERRORS IN REGIMEN'; gradeCol = '#ff6644'; }
+      else if (score >= 85) { grade = 'EXCELLENT — GUIDELINE-CONCORDANT'; gradeCol = '#44ff88'; }
+      else if (score >= 65) { grade = 'GOOD'; gradeCol = '#88dd66'; }
+      else if (score >= 45) { grade = 'INCOMPLETE'; gradeCol = '#ffcc44'; }
+      else if (score >= 20) { grade = 'MAJOR GAPS'; gradeCol = '#ff8844'; }
+      else { grade = 'CRITICAL — PATIENT AT RISK'; gradeCol = '#ff4444'; }
+      fb.innerHTML =
+        `<div style="color:${gradeCol};font-size:11px;letter-spacing:2px;margin-bottom:4px;font-weight:bold;">REGIMEN: ${grade}</div>` +
+        `<div style="color:#888;font-size:9px;margin-bottom:8px;">${correctDrugs.length} correct · ${wrongDrugs.length} incorrect · Score: ${score}/${maxPossible}</div>` +
+        msgs.map(m => `<div style="color:${m.startsWith('✓') ? '#88ffaa' : m.startsWith('✗') ? '#ff8888' : '#ffcc88'};margin:3px 0;font-size:10px;line-height:1.4;">${m}</div>`).join('');
+    }
+
+    let toastTimer = null;
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = type; t.style.display = 'block';
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.display = 'none', 2800);
+    }
+
+    // ─── ENTRY SCENE ───────────────────────────────────────────────
+    const menu = document.getElementById("menu"), labOptions = document.getElementById("labOptions"), labCanvas = document.getElementById("labCanvas"), hud = document.getElementById("hud"), modeIndicator = document.getElementById("modeIndicator");
+    const eScene = new THREE.Scene(); eScene.background = new THREE.Color(0x050a12); eScene.fog = new THREE.Fog(0x050a12, 10, 40);
+    const eCam = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, .1, 1000); eCam.position.z = 10;
+    const eRend = new THREE.WebGLRenderer({ canvas: labCanvas, antialias: true }); eRend.setSize(innerWidth, innerHeight); eRend.setPixelRatio(Math.min(devicePixelRatio, 2));
+    const pg = new THREE.BufferGeometry(), pp = new Float32Array(600);
+    for (let i = 0; i < 200; i++) { pp[i * 3] = (Math.random() - .5) * 30; pp[i * 3 + 1] = (Math.random() - .5) * 30; pp[i * 3 + 2] = (Math.random() - .5) * 30; }
+    pg.setAttribute('position', new THREE.BufferAttribute(pp, 3));
+    eScene.add(new THREE.Points(pg, new THREE.PointsMaterial({ color: 0x00e5ff, size: .08, transparent: true, opacity: .7 })));
+    for (let i = 0; i < 3; i++) { const t = new THREE.Mesh(new THREE.TorusGeometry(2 + i * 1.5, .04, 8, 80), new THREE.MeshBasicMaterial({ color: [0x00e5ff, 0x7c4dff, 0x00b8d4][i], transparent: true, opacity: .5 - i * .1 })); t.rotation.x = Math.PI / 3 * i; t.rotation.z = Math.PI / 4 * i; t.userData.speed = .003 + i * .002; t.userData.axis = new THREE.Vector3(Math.random(), Math.random(), Math.random()).normalize(); eScene.add(t); }
+    eScene.add(new THREE.AmbientLight(0x00e5ff, .2));
+    let eRun = true;
+    function animEntry() { if (!eRun) return; requestAnimationFrame(animEntry); const t = Date.now() * .001; eScene.children.forEach(o => { if (o.userData.axis) o.rotateOnAxis(o.userData.axis, o.userData.speed); }); eCam.position.x = Math.sin(t * .1) * 2; eCam.position.y = Math.cos(t * .07); eCam.lookAt(0, 0, 0); eRend.render(eScene, eCam); }
+    animEntry();
+
+    document.getElementById("playBtn").onclick = () => { menu.style.display = "none"; labOptions.style.display = "block"; };
+    document.getElementById("notesBtn").onclick = () => { const n = prompt("Insert clinical notes:"); if (n) alert("Saved."); };
+    const fi = document.getElementById("fileInput");
+    document.getElementById("filesBtn").onclick = () => fi.click();
+    fi.onchange = () => { labOptions.style.display = "none"; eRun = false; startLab(); };
+    document.getElementById("skipBtn").onclick = () => { labOptions.style.display = "none"; eRun = false; startLab(); };
+
+    // ── PORTAL AUTO-START: skip menu when running inside portal.html ──
+    if (window.__PORTAL_MODE__) {
+      menu.style.display = "none"; labOptions.style.display = "none"; eRun = false;
+      // slight delay so renderer has correct canvas size after iframe becomes z-visible
+      setTimeout(startLab, 120);
+    }
+
+    // ─── TEXTURE HELPERS (from 3d-lab-simulation) ──────────────────
     function mkCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; }
 
     function makeWallTileTex() {
       const [c, ctx] = mkCanvas(512, 512);
       ctx.fillStyle = '#e4ecf0'; ctx.fillRect(0, 0, 512, 512);
       const ts = 64;
-      for (let tx = 0; tx < 8; tx++) for (let ty = 0; ty < 8; ty++) {
+      for (let tx = 0; tx < 8; tx++)for (let ty = 0; ty < 8; ty++) {
         const x = tx * ts, y = ty * ts, v = Math.random() * 5;
         ctx.fillStyle = `rgb(${226 + v | 0},${236 + v | 0},${240 + v | 0})`;
         ctx.fillRect(x + 2, y + 2, ts - 4, ts - 4);
         ctx.fillStyle = '#bac8d0';
         ctx.fillRect(x, y, ts, 2); ctx.fillRect(x, y, 2, ts);
         ctx.fillStyle = '#f0f8fc55';
-        ctx.fillRect(x + 4, y + 4, ts * 0.35, 5);
+        ctx.fillRect(x + 4, y + 4, ts * .35, 5);
       }
       const tex = new THREE.CanvasTexture(c);
-      tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(4, 3);
-      return tex;
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(4, 3); return tex;
     }
 
     function makeBaseboardTex() {
@@ -297,23 +961,21 @@
         ctx.fillStyle = '#99aabb44'; ctx.fillRect(x + 5, 5, 18, 10);
       }
       const tex = new THREE.CanvasTexture(c);
-      tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(7, 1);
-      return tex;
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(7, 1); return tex;
     }
 
     function makeFloorTex() {
       const [c, ctx] = mkCanvas(512, 512);
       const ts = 64;
-      for (let tx = 0; tx < 8; tx++) for (let ty = 0; ty < 8; ty++) {
+      for (let tx = 0; tx < 8; tx++)for (let ty = 0; ty < 8; ty++) {
         const x = tx * ts, y = ty * ts;
         ctx.fillStyle = (tx + ty) % 2 === 0 ? '#b8cad4' : '#a6b8c2';
         ctx.fillRect(x, y, ts, ts);
         ctx.strokeStyle = '#7a8e98'; ctx.lineWidth = 2; ctx.strokeRect(x + 1, y + 1, ts - 2, ts - 2);
-        ctx.fillStyle = '#d8eaf4aa'; ctx.fillRect(x + 3, y + 3, ts * 0.22, 5);
+        ctx.fillStyle = '#d8eaf4aa'; ctx.fillRect(x + 3, y + 3, ts * .22, 5);
       }
       const tex = new THREE.CanvasTexture(c);
-      tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(6, 6);
-      return tex;
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(6, 6); return tex;
     }
 
     function makeWhiteboardTex() {
@@ -322,7 +984,6 @@
       ctx.fillStyle = '#7a8a7a'; ctx.fillRect(0, 0, 512, 8); ctx.fillRect(0, 248, 512, 8);
       ctx.fillRect(0, 0, 8, 256); ctx.fillRect(504, 0, 8, 256);
       ctx.fillStyle = '#9aaa9a'; ctx.fillRect(8, 240, 496, 8);
-      // Benzene ring
       ctx.strokeStyle = '#1a3880'; ctx.lineWidth = 3;
       for (let i = 0; i < 6; i++) {
         const a = i * Math.PI / 3 - Math.PI / 6, a2 = (i + 1) * Math.PI / 3 - Math.PI / 6;
@@ -340,8 +1001,7 @@
       ctx.fillText('Sample A: Positive   |   Sample B: Negative', 145, 135);
       ctx.fillText('PCR Cycle #3  \u2192  Gel Electrophoresis', 145, 162);
       ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1; ctx.setLineDash([5, 5]);
-      ctx.beginPath(); ctx.moveTo(20, 205); ctx.lineTo(492, 205); ctx.stroke();
-      ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(20, 205); ctx.lineTo(492, 205); ctx.stroke(); ctx.setLineDash([]);
       return new THREE.CanvasTexture(c);
     }
 
@@ -350,7 +1010,6 @@
       ctx.fillStyle = bgcol; ctx.fillRect(0, 0, 256, 128);
       ctx.fillStyle = '#111'; ctx.fillRect(4, 4, 248, 120);
       ctx.fillStyle = bgcol; ctx.fillRect(8, 8, 240, 112);
-      // triangle
       ctx.fillStyle = '#111'; ctx.beginPath(); ctx.moveTo(48, 92); ctx.lineTo(78, 42); ctx.lineTo(108, 92); ctx.closePath(); ctx.fill();
       ctx.fillStyle = bgcol; ctx.beginPath(); ctx.moveTo(53, 88); ctx.lineTo(78, 48); ctx.lineTo(103, 88); ctx.closePath(); ctx.fill();
       ctx.fillStyle = '#111'; ctx.font = 'bold 13px Arial'; ctx.textAlign = 'center'; ctx.fillText('!', 78, 84);
@@ -375,14 +1034,10 @@
       ctx.fillStyle = 'white'; ctx.font = 'bold 17px Arial'; ctx.textAlign = 'center';
       ctx.fillText('\u26a0 LAB SAFETY', 128, 22); ctx.fillText('PROCEDURES', 128, 43);
       const rules = [
-        '\ud83e\udd7c  Wear lab coat always',
-        '\ud83e\udd7d  Safety goggles required',
-        '\ud83e\udde4  Gloves for chemicals',
-        '\ud83d\udeab  No food or drink in lab',
-        '\ud83d\udd25  Know extinguisher location',
-        '\ud83d\udeb6  Eyewash: rear wall',
-        '\ud83d\udccb  Log all experiments',
-        '\u267b\ufe0f   Dispose waste properly',
+        '\ud83e\udd7c  Wear lab coat always', '\ud83e\udd7d  Safety goggles required',
+        '\ud83e\udde4  Gloves for chemicals', '\ud83d\udeab  No food or drink in lab',
+        '\ud83d\udd25  Know extinguisher location', '\ud83d\udeb6  Eyewash: rear wall',
+        '\ud83d\udccb  Log all experiments', '\u267b\ufe0f   Dispose waste properly',
         '\u270b  Wash hands on exit',
       ];
       ctx.fillStyle = '#1a1a1a'; ctx.font = '12px Arial'; ctx.textAlign = 'left';
@@ -421,7 +1076,7 @@
       ctx.fillStyle = '#111'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
       ctx.fillText('FUME HOOD', 128, 110); ctx.fillText('KEEP SASH CLOSED', 128, 128); ctx.fillText('WHEN NOT IN USE', 128, 145);
       ctx.fillStyle = '#7788aa';
-      for (let i = 0; i < 6; i++) ctx.fillRect(18 + i * 36, 180, 22, 56);
+      for (let i = 0; i < 6; i++)ctx.fillRect(18 + i * 36, 180, 22, 56);
       return new THREE.CanvasTexture(c);
     }
 
@@ -435,404 +1090,778 @@
       return new THREE.CanvasTexture(c);
     }
 
-    // ── LAB SIMULATION ────────────────────────────────────────────────────────────
-    function startLabSimulation() {
+    // ─── EXISTING TEXTURE HELPERS (labsim6) ────────────────────────
+    function makeDrugTex(drug) {
+      const W = 512, H = 256, c = document.createElement('canvas'); c.width = W; c.height = H;
+      const x = c.getContext('2d');
+      x.fillStyle = '#040c18'; x.fillRect(0, 0, W, H);
+      x.fillStyle = drug.lc; x.globalAlpha = .12; x.fillRect(0, 0, W, H); x.globalAlpha = 1;
+      x.fillStyle = drug.lc; x.fillRect(0, 0, W, 6); x.fillRect(0, H - 6, W, 6);
+      x.strokeStyle = drug.lc; x.globalAlpha = .5; x.lineWidth = 2; x.strokeRect(2, 2, W - 4, H - 4); x.globalAlpha = 1;
+      x.fillStyle = drug.lc; x.font = 'bold 36px monospace'; x.textAlign = 'center'; x.fillText(drug.name, W / 2, 58);
+      x.fillStyle = '#ffffff77'; x.font = '13px monospace'; x.fillText(drug.cls, W / 2, 80);
+      const catCol = { first_line: '#44cc88', sglt2: '#44dd88', glp1: '#ff7744', statin: '#6688dd', acei: '#9966cc', aspirin: '#cc7777', trap_insulin: '#ffaa44', trap_su: '#ddcc44', trap_tzd: '#33aacc', trap_old_su: '#aa8855', trap_glyburide: '#bbaa55', trap_agi: '#55bb99' }[drug.category] || '#888';
+      x.fillStyle = catCol; x.globalAlpha = .25;
+      const bw = x.measureText(drug.category.toUpperCase()).width + 20;
+      x.fillRect(W / 2 - bw / 2, 88, bw, 18); x.globalAlpha = 1;
+      x.fillStyle = catCol; x.font = 'bold 10px monospace'; x.fillText(drug.category.toUpperCase(), W / 2, 101);
+      x.strokeStyle = drug.lc; x.globalAlpha = .25; x.lineWidth = 1; x.beginPath(); x.moveTo(30, 112); x.lineTo(W - 30, 112); x.stroke(); x.globalAlpha = 1;
+      x.fillStyle = '#aaccff'; x.font = '12px monospace'; x.textAlign = 'center';
+      const words = drug.mech.split(' '); let line = '', lines = [];
+      for (const w of words) { const t = line + w + ' '; if (x.measureText(t).width > W - 60 && line) { lines.push(line.trim()); line = w + ' '; } else line = t; } lines.push(line.trim());
+      lines.slice(0, 3).forEach((l, i) => x.fillText(l, W / 2, 130 + i * 17));
+      x.fillStyle = drug.lc; x.globalAlpha = .7; x.font = '11px monospace'; x.fillText('[ CLICK TO INSPECT ]', W / 2, H - 14); x.globalAlpha = 1;
+      return new THREE.CanvasTexture(c);
+    }
+
+    function makeBillTex() {
+      const W = 1280, H = 800, c = document.createElement('canvas'); c.width = W; c.height = H;
+      const x = c.getContext('2d');
+      x.fillStyle = '#020810'; x.fillRect(0, 0, W, H);
+      const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#00e5ff'); g.addColorStop(.5, '#7c4dff'); g.addColorStop(1, '#00e5ff');
+      x.strokeStyle = g; x.lineWidth = 4; x.strokeRect(4, 4, W - 8, H - 8); x.lineWidth = 1; x.globalAlpha = .25; x.strokeRect(12, 12, W - 24, H - 24); x.globalAlpha = 1;
+      x.fillStyle = '#00e5ff'; x.font = 'bold 44px monospace'; x.textAlign = 'center'; x.fillText('TYPE 2 DIABETES MELLITUS', W / 2, 58);
+      x.fillStyle = '#ffffff55'; x.font = '15px monospace'; x.fillText('INSULIN RESISTANCE · PROGRESSIVE β-CELL DYSFUNCTION', W / 2, 83);
+      x.strokeStyle = '#00e5ff44'; x.lineWidth = 1; x.beginPath(); x.moveTo(40, 98); x.lineTo(W - 40, 98); x.stroke();
+      const cols = [
+        { x: W * .18, label: 'PRESENTATION', color: '#55aaff', data: SYMPTOMS.t2 },
+        { x: W * .5, label: 'PATHOPHYSIOLOGY', color: '#ff8844', data: SYMPTOMS.path },
+        { x: W * .82, label: 'MANAGEMENT', color: '#44ee88', data: SYMPTOMS.mgmt }
+      ];
+      cols.forEach(col => {
+        x.fillStyle = col.color; x.font = 'bold 19px monospace'; x.textAlign = 'center'; x.fillText(col.label, col.x, 128);
+        x.strokeStyle = col.color; x.globalAlpha = .3; x.lineWidth = 1; x.beginPath(); x.moveTo(col.x - 155, 138); x.lineTo(col.x + 155, 138); x.stroke(); x.globalAlpha = 1;
+        col.data.forEach((item, ii) => {
+          const y = 162 + ii * 97;
+          x.fillStyle = col.color; x.globalAlpha = .9; x.beginPath(); x.arc(col.x - 150, y + 5, 5, 0, Math.PI * 2); x.fill(); x.globalAlpha = 1;
+          x.textAlign = 'left';
+          const words = item.split(' '); let line = '', lines = [];
+          x.font = '13px monospace';
+          for (const w of words) { const t = line + w + ' '; if (x.measureText(t).width > 270 && line) { lines.push(line.trim()); line = w + ' '; } else line = t; } lines.push(line.trim());
+          lines.forEach((l, li) => { x.fillStyle = li === 0 ? '#d8eeff' : '#7aaccc'; x.font = '13px monospace'; x.fillText(l, col.x - 140, y + li * 16); });
+        });
+      });
+      x.fillStyle = '#ffffff33'; x.font = '13px monospace'; x.textAlign = 'center';
+      x.fillText('Dx: HbA1c ≥ 6.5% · FBG ≥ 126 mg/dL · 2hr OGTT ≥ 200 mg/dL · Random ≥ 200 + symptoms', W / 2, H - 18);
+      return new THREE.CanvasTexture(c);
+    }
+
+    function makePatientTex() {
+      const W = 1280, H = 800, c = document.createElement('canvas'); c.width = W; c.height = H;
+      const x = c.getContext('2d');
+      x.fillStyle = '#020810'; x.fillRect(0, 0, W, H);
+      const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#ff8844'); g.addColorStop(.5, '#ff4488'); g.addColorStop(1, '#ff8844');
+      x.strokeStyle = g; x.lineWidth = 3; x.strokeRect(4, 4, W - 8, H - 8);
+      x.fillStyle = '#ff8844'; x.font = 'bold 36px monospace'; x.textAlign = 'center'; x.fillText('PATIENT PRESENTATION', W / 2, 50);
+      x.fillStyle = '#ffffff44'; x.font = '14px monospace'; x.fillText(PATIENT.name + ' · ' + PATIENT.age + 'yr ' + PATIENT.sex + ' · ' + PATIENT.dx, W / 2, 75);
+      const sx = 220, sy = 160;
+      x.save();
+      x.fillStyle = '#ff884422'; x.strokeStyle = '#ff884488'; x.lineWidth = 2;
+      x.beginPath(); x.arc(sx, sy, 44, 0, Math.PI * 2); x.fill(); x.stroke();
+      x.fillRect(sx - 16, sy + 44, 32, 18); x.strokeRect(sx - 16, sy + 44, 32, 18);
+      x.beginPath(); x.moveTo(sx - 70, sy + 62); x.lineTo(sx + 70, sy + 62);
+      x.quadraticCurveTo(sx + 85, sy + 140, sx + 65, sy + 230);
+      x.lineTo(sx - 65, sy + 230); x.quadraticCurveTo(sx - 85, sy + 140, sx - 70, sy + 62);
+      x.closePath(); x.fill(); x.stroke();
+      x.strokeStyle = '#ff884444'; x.lineWidth = 1;
+      x.beginPath(); x.ellipse(sx, sy + 155, 60, 55, 0, 0, Math.PI * 2); x.stroke();
+      x.strokeStyle = '#ff884488'; x.lineWidth = 2;
+      x.beginPath(); x.moveTo(sx - 70, sy + 62); x.lineTo(sx - 100, sy + 185); x.lineTo(sx - 82, sy + 190); x.lineTo(sx - 58, sy + 90); x.closePath(); x.fill(); x.stroke();
+      x.beginPath(); x.moveTo(sx + 70, sy + 62); x.lineTo(sx + 100, sy + 185); x.lineTo(sx + 82, sy + 190); x.lineTo(sx + 58, sy + 90); x.closePath(); x.fill(); x.stroke();
+      x.beginPath(); x.moveTo(sx - 55, sy + 230); x.lineTo(sx - 58, sy + 375); x.lineTo(sx - 30, sy + 377); x.lineTo(sx - 10, sy + 235); x.closePath(); x.fill(); x.stroke();
+      x.beginPath(); x.moveTo(sx + 55, sy + 230); x.lineTo(sx + 58, sy + 375); x.lineTo(sx + 30, sy + 377); x.lineTo(sx + 10, sy + 235); x.closePath(); x.fill(); x.stroke();
+      const annots = [
+        { x: sx, y: sy - 55, label: "Blurred vision", tx: sx + 130, ty: sy - 50 },
+        { x: sx + 30, y: sy + 10, label: "Acanthosis nigricans (neck)", tx: sx + 130, ty: sy + 10 },
+        { x: sx + 75, y: sy + 145, label: "Central obesity (BMI 34)", tx: sx + 140, ty: sy + 140 },
+        { x: sx - 75, y: sy + 100, label: "HTN 148/92", tx: sx - 230, ty: sy + 100 },
+        { x: sx - 60, y: sy + 175, label: "Dyslipidemia (LDL 158, TG 310)", tx: sx - 290, ty: sy + 175 },
+        { x: sx, y: sy + 350, label: "Tingling/numbness (neuropathy)", tx: sx + 140, ty: sy + 350 },
+        { x: sx + 55, y: sy + 370, label: "Slow-healing wound (L shin)", tx: sx + 140, ty: sy + 380 },
+        { x: sx - 55, y: sy + 250, label: "Microalbuminuria (eGFR 68)", tx: sx - 290, ty: sy + 250 },
+      ];
+      x.font = '11px monospace';
+      annots.forEach(a => {
+        x.strokeStyle = '#ff884466'; x.lineWidth = 1;
+        x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(a.tx, a.ty); x.stroke();
+        x.fillStyle = '#ffccaa'; x.textAlign = a.tx < sx ? 'right' : 'left';
+        x.fillText(a.label, a.tx + (a.tx < sx ? -6 : 6), a.ty + 4);
+      });
+      const rx = 720, ry = 100;
+      x.textAlign = 'left';
+      x.fillStyle = '#ff884499'; x.font = 'bold 16px monospace'; x.fillText('VITALS', rx, ry);
+      x.fillStyle = '#ccddff'; x.font = '12px monospace';
+      PATIENT.vitals.split(', ').forEach((v, i) => x.fillText(v, rx, ry + 22 + i * 18));
+      const ly = ry + 145;
+      x.fillStyle = '#ff884499'; x.font = 'bold 16px monospace'; x.fillText('KEY LABS', rx, ly);
+      x.fillStyle = '#ff6666'; x.font = '12px monospace';
+      x.fillText('HbA1c: ' + PATIENT.hba1c + ' (↑↑)', rx, ly + 22);
+      x.fillText('Fasting BG: ' + PATIENT.fbg + ' (↑↑)', rx, ly + 40);
+      x.fillStyle = '#ffcc66'; x.fillText('Lipids: ' + PATIENT.lipids, rx, ly + 58);
+      x.fillStyle = '#44aaff';
+      x.fillText('C-peptide: ' + PATIENT.cpeptide, rx, ly + 76);
+      x.fillText('Antibodies: ' + PATIENT.antibodies, rx, ly + 94);
+      const cy = ly + 130;
+      x.fillStyle = '#ff884499'; x.font = 'bold 16px monospace'; x.fillText('COMORBIDITIES', rx, cy);
+      x.fillStyle = '#ddbbaa'; x.font = '11px monospace';
+      const cwords = PATIENT.comorbid.split(', ');
+      let cline = '', clines = [];
+      for (const w of cwords) { const t = cline + w + ', '; if (x.measureText(t).width > 480 && cline) { clines.push(cline.trim().replace(/,$/, '')); cline = w + ', '; } else cline = t; } clines.push(cline.trim().replace(/,$/, ''));
+      clines.forEach((l, i) => x.fillText(l, rx, cy + 20 + i * 16));
+      const py = cy + 20 + clines.length * 16 + 20;
+      x.fillStyle = '#ff884499'; x.font = 'bold 16px monospace'; x.fillText('PRESENTING COMPLAINT', rx, py);
+      x.fillStyle = '#bbccdd'; x.font = '11px monospace';
+      const pwords = PATIENT.presenting.split(' '); let pline = '', plines = [];
+      for (const w of pwords) { const t = pline + w + ' '; if (x.measureText(t).width > 480 && pline) { plines.push(pline.trim()); pline = w + ' '; } else pline = t; } plines.push(pline.trim());
+      plines.forEach((l, i) => x.fillText(l, rx, py + 20 + i * 16));
+      const my = py + 20 + plines.length * 16 + 30;
+      x.fillStyle = '#44ee88aa'; x.font = 'bold 16px monospace'; x.fillText('MANAGEMENT PLAN', rx, my);
+      x.fillStyle = '#aaddbb'; x.font = '11px monospace';
+      PATIENT.plan.split('\n').forEach((l, i) => x.fillText(l, rx, my + 20 + i * 18));
+      x.restore();
+      x.fillStyle = '#ff8844'; x.globalAlpha = .7; x.font = 'bold 13px monospace'; x.textAlign = 'center';
+      x.fillText('[ CLICK BOARD TO OPEN FULL PATIENT CHART ]', W / 2, H - 16);
+      x.globalAlpha = 1;
+      return new THREE.CanvasTexture(c);
+    }
+
+    // ─── MAIN LAB ──────────────────────────────────────────────────
+    function startLab() {
       hud.style.display = "block"; modeIndicator.style.display = "block";
+      document.getElementById("regimenPanel").style.display = "block";
 
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0x0a0f1a);
-      scene.fog = new THREE.FogExp2(0x0a0f1a, 0.011);
+      scene.fog = new THREE.FogExp2(0x0a0f1a, .011);
 
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 200);
+      const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, .1, 200);
       camera.position.set(0, 3.2, 12);
 
       const renderer = new THREE.WebGLRenderer({ canvas: labCanvas, antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 0.9;
+      renderer.toneMappingExposure = .9;
 
-      // Lighting
+      // ── LIGHTING (enhanced) ──
       scene.add(new THREE.AmbientLight(0xcce8ff, 1.1));
-      [[-12, 7, -12], [0, 7, -12], [12, 7, -12], [-12, 7, 0], [0, 7, 0], [12, 7, 0], [-12, 7, 12], [0, 7, 12], [12, 7, 12]].forEach(([x, y, z]) => {
-        const l = new THREE.PointLight(0xd0eeff, 0.9, 22);
-        l.position.set(x, y, z); l.castShadow = true; l.shadow.mapSize.width = 512; l.shadow.mapSize.height = 512; l.shadow.radius = 4;
-        scene.add(l);
-        const sm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.5, 8), new THREE.MeshBasicMaterial({ color: 0xd0eeff, transparent: true, opacity: 0.9 }));
-        sm.rotation.z = Math.PI / 2; sm.position.set(x, 7.15, z); scene.add(sm);
-        const hm = new THREE.Mesh(new THREE.PlaneGeometry(3, 0.8), new THREE.MeshBasicMaterial({ color: 0xd0eeff, transparent: true, opacity: 0.07, side: THREE.DoubleSide }));
-        hm.position.set(x, 7.1, z); hm.rotation.x = Math.PI / 2; scene.add(hm);
+      [[-12, 7, -12], [0, 7, -12], [12, 7, -12], [-12, 7, 0], [0, 7, 0], [12, 7, 0], [-12, 7, 12], [0, 7, 12], [12, 7, 12]].forEach(([lx, ly, lz]) => {
+        const l = new THREE.PointLight(0xd0eeff, .9, 22);
+        l.position.set(lx, ly, lz); l.castShadow = true; l.shadow.mapSize.width = 512; l.shadow.mapSize.height = 512; l.shadow.radius = 4; scene.add(l);
+        const s = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, 2.5, 8), new THREE.MeshBasicMaterial({ color: 0xd0eeff, transparent: true, opacity: .9 }));
+        s.rotation.z = Math.PI / 2; s.position.set(lx, 7.15, lz); scene.add(s);
+        const hm = new THREE.Mesh(new THREE.PlaneGeometry(3, .8), new THREE.MeshBasicMaterial({ color: 0xd0eeff, transparent: true, opacity: .07, side: THREE.DoubleSide }));
+        hm.position.set(lx, 7.1, lz); hm.rotation.x = Math.PI / 2; scene.add(hm);
       });
-      const al1 = new THREE.PointLight(0x00e5ff, 0.3, 30);
-      al1.position.set(-18, 3, -18); scene.add(al1);
-      const al2 = new THREE.PointLight(0x7c4dff, 0.2, 30);
-      al2.position.set(18, 3, 18); scene.add(al2);
+      const al1 = new THREE.PointLight(0x00e5ff, .3, 30); al1.position.set(-18, 3, -18); scene.add(al1);
+      const al2 = new THREE.PointLight(0x7c4dff, .2, 30); al2.position.set(18, 3, 18); scene.add(al2);
 
-      const roomW = 52, roomH = 9, roomD = 52, hw = 26, hd = 26;
+      const RW = 52, RH = 9, RD = 52, hw = 26, hd = 26;
 
-      // ── FLOOR ──
-      const floor = new THREE.Mesh(new THREE.PlaneGeometry(roomW, roomD), new THREE.MeshStandardMaterial({ map: makeFloorTex(), roughness: 0.3, metalness: 0.1 }));
+      // ── FLOOR (detailed checkerboard) ──
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(RW, RD), new THREE.MeshStandardMaterial({ map: makeFloorTex(), roughness: .3, metalness: .1 }));
       floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
-      const refl = new THREE.Mesh(new THREE.PlaneGeometry(roomW, roomD), new THREE.MeshBasicMaterial({ color: 0xd0eeff, transparent: true, opacity: 0.03 }));
-      refl.rotation.x = -Math.PI / 2; refl.position.y = 0.01; scene.add(refl);
+      const refl = new THREE.Mesh(new THREE.PlaneGeometry(RW, RD), new THREE.MeshBasicMaterial({ color: 0xd0eeff, transparent: true, opacity: .03 }));
+      refl.rotation.x = -Math.PI / 2; refl.position.y = .01; scene.add(refl);
 
-      // ── CEILING with grid ──
-      const ceil = new THREE.Mesh(new THREE.PlaneGeometry(roomW, roomD), new THREE.MeshStandardMaterial({ color: 0xe8eef4, roughness: 0.9 }));
-      ceil.rotation.x = Math.PI / 2; ceil.position.y = roomH; scene.add(ceil);
+      // ── CEILING with suspended grid ──
+      const ceil = new THREE.Mesh(new THREE.PlaneGeometry(RW, RD), new THREE.MeshStandardMaterial({ color: 0xe8eef4, roughness: .9 }));
+      ceil.rotation.x = Math.PI / 2; ceil.position.y = RH; scene.add(ceil);
       const barM = new THREE.MeshBasicMaterial({ color: 0xb0bcc8 });
-      for (let x = -24; x <= 24; x += 4) { const b = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.02, roomD), barM); b.position.set(x, roomH - 0.01, 0); scene.add(b); }
-      for (let z = -24; z <= 24; z += 4) { const b = new THREE.Mesh(new THREE.BoxGeometry(roomW, 0.02, 0.04), barM); b.position.set(0, roomH - 0.01, z); scene.add(b); }
+      for (let bx = -24; bx <= 24; bx += 4) { const b = new THREE.Mesh(new THREE.BoxGeometry(.04, .02, RD), barM); b.position.set(bx, RH - .01, 0); scene.add(b); }
+      for (let bz = -24; bz <= 24; bz += 4) { const b = new THREE.Mesh(new THREE.BoxGeometry(RW, .02, .04), barM); b.position.set(0, RH - .01, bz); scene.add(b); }
 
       // ── WALLS: tiled panels with baseboard ──
-      const wallTileMat = new THREE.MeshStandardMaterial({ map: makeWallTileTex(), roughness: 0.5, metalness: 0.02 });
-      const baseboardMat = new THREE.MeshStandardMaterial({ map: makeBaseboardTex(), roughness: 0.4, metalness: 0.05 });
+      const wallTileMat = new THREE.MeshStandardMaterial({ map: makeWallTileTex(), roughness: .5, metalness: .02 });
+      const baseboardMat = new THREE.MeshStandardMaterial({ map: makeBaseboardTex(), roughness: .4, metalness: .05 });
 
-      function addWall(x, y, z, w, h, rotY) {
-        const upperH = h - 1.2;
-        const upper = new THREE.Mesh(new THREE.PlaneGeometry(w, upperH), wallTileMat);
-        upper.position.set(x, y - h / 2 + 1.2 + upperH / 2, z); upper.rotation.y = rotY; upper.receiveShadow = true; scene.add(upper);
-        const base = new THREE.Mesh(new THREE.PlaneGeometry(w, 1.2), baseboardMat);
-        base.position.set(x, y - h / 2 + 0.6, z); base.rotation.y = rotY; scene.add(base);
-        const trim = new THREE.Mesh(new THREE.BoxGeometry(rotY === 0 || rotY === Math.PI ? w : 0.05, 0.06, rotY === 0 || rotY === Math.PI ? 0.05 : w), new THREE.MeshStandardMaterial({ color: 0x3a4a58, roughness: 0.5, metalness: 0.3 }));
-        trim.position.set(x, y - h / 2 + 1.22, z + (rotY === 0 ? 0.03 : 0)); scene.add(trim);
+      function addWall(wx, wy, wz, ww, wh, rotY) {
+        const uH = wh - 1.2;
+        const upper = new THREE.Mesh(new THREE.PlaneGeometry(ww, uH), wallTileMat);
+        upper.position.set(wx, wy - wh / 2 + 1.2 + uH / 2, wz); upper.rotation.y = rotY; upper.receiveShadow = true; scene.add(upper);
+        const base = new THREE.Mesh(new THREE.PlaneGeometry(ww, 1.2), baseboardMat);
+        base.position.set(wx, wy - wh / 2 + .6, wz); base.rotation.y = rotY; scene.add(base);
+        const trimW = (rotY === 0 || rotY === Math.PI) ? ww : .05;
+        const trimD = (rotY === 0 || rotY === Math.PI) ? .05 : ww;
+        const trim = new THREE.Mesh(new THREE.BoxGeometry(trimW, .06, trimD), new THREE.MeshStandardMaterial({ color: 0x3a4a58, roughness: .5, metalness: .3 }));
+        trim.position.set(wx, wy - wh / 2 + 1.22, wz + (rotY === 0 ? .03 : 0)); scene.add(trim);
       }
-      const cy = roomH / 2;
-      addWall(0, cy, -hd + 0.03, roomW, roomH, 0);
-      addWall(0, cy, hd - 0.03, roomW, roomH, Math.PI);
-      addWall(-hw + 0.03, cy, 0, roomD, roomH, Math.PI / 2);
-      addWall(hw - 0.03, cy, 0, roomD, roomH, -Math.PI / 2);
+      const wallCy = RH / 2;
+      addWall(0, wallCy, -hd + .03, RW, RH, 0);
+      addWall(0, wallCy, hd - .03, RW, RH, Math.PI);
+      addWall(-hw + .03, wallCy, 0, RD, RH, Math.PI / 2);
+      addWall(hw - .03, wallCy, 0, RD, RH, -Math.PI / 2);
 
-      // Teal accent strip near ceiling
-      const accM = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.35 });
-      [{ p: [0, 8.3, -hd + 0.1], s: [roomW, 0.08, 0.08] }, { p: [0, 8.3, hd - 0.1], s: [roomW, 0.08, 0.08] },
-      { p: [-hw + 0.1, 8.3, 0], s: [0.08, 0.08, roomD] }, { p: [hw - 0.1, 8.3, 0], s: [0.08, 0.08, roomD] }
-      ].forEach(({ p, s }) => { const m = new THREE.Mesh(new THREE.BoxGeometry(...s), accM); m.position.set(...p); scene.add(m); });
+      // Teal accent strips near ceiling
+      const accM = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: .35 });
+      [{ p: [0, 8.3, -hd + .1], s: [RW, .08, .08] }, { p: [0, 8.3, hd - .1], s: [RW, .08, .08] }, { p: [-hw + .1, 8.3, 0], s: [.08, .08, RD] }, { p: [hw - .1, 8.3, 0], s: [.08, .08, RD] }].forEach(({ p, s }) => { const m = new THREE.Mesh(new THREE.BoxGeometry(...s), accM); m.position.set(...p); scene.add(m); });
 
-      // ── FUME HOODS (back wall) ──
+      // ── FUME HOODS (back wall flanking billboards) ──
       function makeFumeHood(x, z, ry) {
         const g = new THREE.Group();
-        const bM = new THREE.MeshStandardMaterial({ color: 0x8899aa, roughness: 0.5, metalness: 0.1 });
-        const fumeBody = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.2, 0.8), bM); fumeBody.position.set(0, 1.1, 0); g.add(fumeBody);
-        const sM = new THREE.MeshStandardMaterial({ color: 0x88ccff, transparent: true, opacity: 0.28, roughness: 0.05 });
-        const sash = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.85, 0.04), sM); sash.position.set(0, 1.42, 0.42); g.add(sash);
-        const fM = new THREE.MeshStandardMaterial({ color: 0x445566, roughness: 0.4, metalness: 0.4 });
-        [[0, 1.9, 0.42], [0, 0.96, 0.42]].forEach(p => { const m = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.06, 0.06), fM); m.position.set(...p); g.add(m); });
-        const bp = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.0), new THREE.MeshStandardMaterial({ map: makeFumeHoodTex(), roughness: 0.6 }));
-        bp.position.set(0, 1.0, -0.38); g.add(bp);
-        const wM = new THREE.MeshStandardMaterial({ color: 0x2a3444, roughness: 0.3, metalness: 0.15 });
-        const ws = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.06, 0.8), wM); ws.position.y = 0; g.add(ws);
-        [-1.2, 1.2].forEach(dx => { const sw = new THREE.Mesh(new THREE.BoxGeometry(0.04, 2.2, 0.8), new THREE.MeshStandardMaterial({ color: 0x667788, roughness: 0.4 })); sw.position.set(dx, 1.1, 0); g.add(sw); });
-        const lg = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 8), new THREE.MeshBasicMaterial({ color: 0x00ff44 })); lg.position.set(0.85, 2.15, 0.35); g.add(lg);
-        const lr = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 8), new THREE.MeshBasicMaterial({ color: 0xff3300 })); lr.position.set(0.62, 2.15, 0.35); g.add(lr);
-        const lbl = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.28), new THREE.MeshStandardMaterial({ map: makeHazardTex('FUME HOOD', '#ffcc00'), roughness: 0.5 }));
-        lbl.position.set(0, 2.1, 0.41); g.add(lbl);
+        const bM = new THREE.MeshStandardMaterial({ color: 0x8899aa, roughness: .5, metalness: .1 });
+        const fb = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.2, .8), bM); fb.position.set(0, 1.1, 0); g.add(fb);
+        const sM = new THREE.MeshStandardMaterial({ color: 0x88ccff, transparent: true, opacity: .28, roughness: .05 });
+        const sash = new THREE.Mesh(new THREE.BoxGeometry(2.2, .85, .04), sM); sash.position.set(0, 1.42, .42); g.add(sash);
+        const fM = new THREE.MeshStandardMaterial({ color: 0x445566, roughness: .4, metalness: .4 });
+        [[0, 1.9, .42], [0, .96, .42]].forEach(fpp => { const fm = new THREE.Mesh(new THREE.BoxGeometry(2.2, .06, .06), fM); fm.position.set(...fpp); g.add(fm); });
+        const bp = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.0), new THREE.MeshStandardMaterial({ map: makeFumeHoodTex(), roughness: .6 }));
+        bp.position.set(0, 1.0, -.38); g.add(bp);
+        const ws = new THREE.Mesh(new THREE.BoxGeometry(2.4, .06, .8), new THREE.MeshStandardMaterial({ color: 0x2a3444, roughness: .3, metalness: .15 })); ws.position.y = 0; g.add(ws);
+        [-1.2, 1.2].forEach(dx => { const sw = new THREE.Mesh(new THREE.BoxGeometry(.04, 2.2, .8), new THREE.MeshStandardMaterial({ color: 0x667788, roughness: .4 })); sw.position.set(dx, 1.1, 0); g.add(sw); });
+        const lg = new THREE.Mesh(new THREE.SphereGeometry(.04, 8, 8), new THREE.MeshBasicMaterial({ color: 0x00ff44 })); lg.position.set(.85, 2.15, .35); g.add(lg);
+        const lr = new THREE.Mesh(new THREE.SphereGeometry(.04, 8, 8), new THREE.MeshBasicMaterial({ color: 0xff3300 })); lr.position.set(.62, 2.15, .35); g.add(lr);
+        const lbl = new THREE.Mesh(new THREE.PlaneGeometry(1.1, .28), new THREE.MeshStandardMaterial({ map: makeHazardTex('FUME HOOD', '#ffcc00'), roughness: .5 }));
+        lbl.position.set(0, 2.1, .41); g.add(lbl);
         g.position.set(x, 0, z); g.rotation.y = ry; scene.add(g);
       }
-      makeFumeHood(-16, -hd + 0.8, 0); makeFumeHood(-6, -hd + 0.8, 0);
-      makeFumeHood(6, -hd + 0.8, 0); makeFumeHood(16, -hd + 0.8, 0);
+      makeFumeHood(-22, -hd + .8, 0);
+      makeFumeHood(22, -hd + .8, 0);
 
-      // ── WALL CABINETS (back wall upper) ──
-      const wcM = new THREE.MeshStandardMaterial({ color: 0x9aafc0, roughness: 0.5, metalness: 0.05 });
-      const wdM = new THREE.MeshStandardMaterial({ color: 0xb0c8d8, roughness: 0.35, metalness: 0.12 });
-      const whM = new THREE.MeshStandardMaterial({ color: 0xe0e8f0, roughness: 0.2, metalness: 0.8 });
-      [-22, -8, 8, 22].forEach(x => {
-        const cab = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.4, 0.55), wcM);
-        cab.position.set(x, 6.3, -hd + 0.55); cab.castShadow = true; scene.add(cab);
-        [-0.82, 0.82].forEach(dx => {
-          const d = new THREE.Mesh(new THREE.BoxGeometry(1.44, 1.2, 0.05), wdM);
-          d.position.set(x + dx, 6.3, -hd + 0.84); scene.add(d);
-          const h = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.35, 8), whM);
-          h.rotation.z = Math.PI / 2; h.position.set(x + dx, 6.3, -hd + 0.88); scene.add(h);
+      // ── WALL CABINETS (back wall upper, enhanced) ──
+      const wcM = new THREE.MeshStandardMaterial({ color: 0x9aafc0, roughness: .5, metalness: .05 });
+      const wdM = new THREE.MeshStandardMaterial({ color: 0xb0c8d8, roughness: .35, metalness: .12 });
+      const whM = new THREE.MeshStandardMaterial({ color: 0xe0e8f0, roughness: .2, metalness: .8 });
+      [-24, -12, 0, 12, 24].forEach(wcx => {
+        const cab = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.2, .5), wcM);
+        cab.position.set(wcx, 6.5, -RD / 2 + .5); cab.castShadow = true; scene.add(cab);
+        [-.76, .76].forEach(dx => {
+          const d = new THREE.Mesh(new THREE.BoxGeometry(1.38, 1.0, .05), wdM);
+          d.position.set(wcx + dx, 6.5, -RD / 2 + .84); scene.add(d);
+          const h = new THREE.Mesh(new THREE.CylinderGeometry(.02, .02, .32, 8), whM);
+          h.rotation.z = Math.PI / 2; h.position.set(wcx + dx, 6.5, -RD / 2 + .88); scene.add(h);
         });
       });
 
       // ── WHITEBOARD (right wall) ──
-      const wbFrM = new THREE.MeshStandardMaterial({ color: 0x445566, roughness: 0.4, metalness: 0.3 });
-      const wbFr = new THREE.Mesh(new THREE.BoxGeometry(0.06, 3.0, 5.5), wbFrM);
-      wbFr.position.set(hw - 0.04, 4.5, -4); scene.add(wbFr);
-      const wb = new THREE.Mesh(new THREE.PlaneGeometry(5.0, 2.6), new THREE.MeshStandardMaterial({ map: makeWhiteboardTex(), roughness: 0.05 }));
-      wb.rotation.y = -Math.PI / 2; wb.position.set(hw - 0.07, 4.5, -4); scene.add(wb);
-      const wbTray = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 5.0), wbFrM);
-      wbTray.position.set(hw - 0.04, 3.17, -4); scene.add(wbTray);
+      const wbFrM = new THREE.MeshStandardMaterial({ color: 0x445566, roughness: .4, metalness: .3 });
+      const wbFr = new THREE.Mesh(new THREE.BoxGeometry(.06, 3.0, 5.5), wbFrM);
+      wbFr.position.set(hw - .04, 4.5, -4); scene.add(wbFr);
+      const wb = new THREE.Mesh(new THREE.PlaneGeometry(5.0, 2.6), new THREE.MeshStandardMaterial({ map: makeWhiteboardTex(), roughness: .05 }));
+      wb.rotation.y = -Math.PI / 2; wb.position.set(hw - .07, 4.5, -4); scene.add(wb);
+      const wbTray = new THREE.Mesh(new THREE.BoxGeometry(.06, .08, 5.0), wbFrM);
+      wbTray.position.set(hw - .04, 3.17, -4); scene.add(wbTray);
       ['#ff4444', '#4488ff', '#44aa44', '#111111'].forEach((col, i) => {
-        const mk = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.28, 8), new THREE.MeshStandardMaterial({ color: parseInt(col.replace('#', '0x')), roughness: 0.5 }));
-        mk.rotation.x = Math.PI / 2; mk.position.set(hw - 0.09, 3.19, -2.4 + i * 0.42); scene.add(mk);
+        const mk = new THREE.Mesh(new THREE.CylinderGeometry(.018, .018, .28, 8), new THREE.MeshStandardMaterial({ color: parseInt(col.replace('#', '0x')), roughness: .5 }));
+        mk.rotation.x = Math.PI / 2; mk.position.set(hw - .09, 3.19, -2.4 + i * .42); scene.add(mk);
       });
 
       // ── PERIODIC TABLE POSTER (right wall) ──
-      const ptFr = new THREE.Mesh(new THREE.BoxGeometry(0.05, 2.3, 3.7), new THREE.MeshStandardMaterial({ color: 0x334455, roughness: 0.5 }));
-      ptFr.position.set(hw - 0.04, 5.2, 8); scene.add(ptFr);
-      const pt = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 2.1), new THREE.MeshStandardMaterial({ map: makePTableTex(), roughness: 0.7 }));
-      pt.rotation.y = -Math.PI / 2; pt.position.set(hw - 0.06, 5.2, 8); scene.add(pt);
+      const ptFr = new THREE.Mesh(new THREE.BoxGeometry(.05, 2.3, 3.7), new THREE.MeshStandardMaterial({ color: 0x334455, roughness: .5 }));
+      ptFr.position.set(hw - .04, 5.2, 8); scene.add(ptFr);
+      const pt = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 2.1), new THREE.MeshStandardMaterial({ map: makePTableTex(), roughness: .7 }));
+      pt.rotation.y = -Math.PI / 2; pt.position.set(hw - .06, 5.2, 8); scene.add(pt);
 
       // ── SAFETY POSTER (left wall) ──
-      const spFr = new THREE.Mesh(new THREE.BoxGeometry(0.05, 2.2, 1.5), new THREE.MeshStandardMaterial({ color: 0x334455, roughness: 0.5 }));
-      spFr.position.set(-hw + 0.04, 4.5, 15); scene.add(spFr);
-      const sp = new THREE.Mesh(new THREE.PlaneGeometry(1.35, 2.05), new THREE.MeshStandardMaterial({ map: makeSafetyPosterTex(), roughness: 0.7 }));
-      sp.rotation.y = Math.PI / 2; sp.position.set(-hw + 0.06, 4.5, 15); scene.add(sp);
+      const spFr = new THREE.Mesh(new THREE.BoxGeometry(.05, 2.2, 1.5), new THREE.MeshStandardMaterial({ color: 0x334455, roughness: .5 }));
+      spFr.position.set(-hw + .04, 4.5, 15); scene.add(spFr);
+      const sp = new THREE.Mesh(new THREE.PlaneGeometry(1.35, 2.05), new THREE.MeshStandardMaterial({ map: makeSafetyPosterTex(), roughness: .7 }));
+      sp.rotation.y = Math.PI / 2; sp.position.set(-hw + .06, 4.5, 15); scene.add(sp);
 
-      // ── HAZARD SIGNS (back wall) ──
-      [{ x: -10, lbl: 'BIOHAZARD', c: '#cc2200' }, { x: 0, lbl: 'CHEMICAL', c: '#ff8800' }, { x: 10, lbl: 'FLAMMABLE', c: '#ff5500' }].forEach(({ x, lbl, c }) => {
-        const s = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.35), new THREE.MeshStandardMaterial({ map: makeHazardTex(lbl, c), roughness: 0.6 }));
-        s.position.set(x, 2.7, -hd + 0.05); scene.add(s);
+      // ── HAZARD SIGNS (back wall, center gap between billboards) ──
+      [{ x: -4, lbl: 'BIOHAZARD', c: '#cc2200' }, { x: 0, lbl: 'CHEMICAL', c: '#ff8800' }, { x: 4, lbl: 'FLAMMABLE', c: '#ff5500' }].forEach(({ x, lbl, c }) => {
+        const hs = new THREE.Mesh(new THREE.PlaneGeometry(.7, .35), new THREE.MeshStandardMaterial({ map: makeHazardTex(lbl, c), roughness: .6 }));
+        hs.position.set(x, 2.7, -hd + .05); scene.add(hs);
       });
 
-      // ── EXIT SIGN ──
-      const exitS = new THREE.Mesh(new THREE.PlaneGeometry(0.85, 0.38), new THREE.MeshStandardMaterial({ map: makeExitTex(), roughness: 0.5 }));
-      exitS.position.set(0, 8.1, hd - 0.07); exitS.rotation.y = Math.PI; scene.add(exitS);
-      const exitL = new THREE.PointLight(0xff0000, 0.4, 3); exitL.position.set(0, 7.7, hd - 0.3); scene.add(exitL);
+      // ── EXIT SIGN (front wall above doorway) ──
+      const exitS = new THREE.Mesh(new THREE.PlaneGeometry(.85, .38), new THREE.MeshStandardMaterial({ map: makeExitTex(), roughness: .5 }));
+      exitS.position.set(0, 8.1, hd - .07); exitS.rotation.y = Math.PI; scene.add(exitS);
+      const exitL = new THREE.PointLight(0xff0000, .4, 3); exitL.position.set(0, 7.7, hd - .3); scene.add(exitL);
+
+      // ── EXIT DOOR (front wall, centered between Billboard 1 & 2) ──
+      (function buildExitDoor() {
+        const dW = 4.2, dH = 7.2;   // door opening width & height
+        const fT = .18;              // frame thickness
+        const wZ = hd - .03;        // front-wall Z plane
+        const dZ = wZ + .02;        // door sits just in front of wall
+        const frameMat = new THREE.MeshStandardMaterial({ color: 0x556677, roughness: .25, metalness: .85 });
+        const glowEdgeMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: .7 });
+
+        // Dark recess panel — masks wall tiles to simulate door opening
+        const recess = new THREE.Mesh(
+          new THREE.PlaneGeometry(dW + fT * 2, dH + fT),
+          new THREE.MeshStandardMaterial({ color: 0x050e18, roughness: .9 })
+        );
+        recess.position.set(0, dH / 2 + fT * .5, dZ - .01); recess.rotation.y = Math.PI; scene.add(recess);
+
+        // Frame pieces (top, left, right)
+        const topBar = new THREE.Mesh(new THREE.BoxGeometry(dW + fT * 2 + .08, fT, fT), frameMat);
+        topBar.position.set(0, dH + fT * .5, dZ); scene.add(topBar);
+        [-(dW / 2 + fT / 2), (dW / 2 + fT / 2)].forEach(sx => {
+          const sideBar = new THREE.Mesh(new THREE.BoxGeometry(fT, dH + fT, fT), frameMat);
+          sideBar.position.set(sx, dH / 2 + fT * .5, dZ); scene.add(sideBar);
+        });
+        // Floor threshold
+        const threshold = new THREE.Mesh(new THREE.BoxGeometry(dW + fT * 2 + .08, .06, .35), frameMat);
+        threshold.position.set(0, .03, dZ - .1); scene.add(threshold);
+
+        // Glowing edge strip (top of frame)
+        const glowTop = new THREE.Mesh(new THREE.BoxGeometry(dW + fT * 2 + .08, .06, .06), glowEdgeMat);
+        glowTop.position.set(0, dH + fT * .5 + fT / 2, dZ + .01); scene.add(glowTop);
+        // Glowing edge strips (sides)
+        [-(dW / 2 + fT / 2), (dW / 2 + fT / 2)].forEach(sx => {
+          const glowSide = new THREE.Mesh(new THREE.BoxGeometry(.06, dH + fT, .06), glowEdgeMat);
+          glowSide.position.set(sx, dH / 2 + fT * .5, dZ + .01); scene.add(glowSide);
+        });
+
+        // Door panels — two leaves (each half-width), glass-like
+        const panelMat = new THREE.MeshStandardMaterial({
+          color: 0x223344, roughness: .05, metalness: .4, transparent: true, opacity: .82
+        });
+        const panelEnvMat = new THREE.MeshStandardMaterial({
+          color: 0x1a3a2a, roughness: .05, metalness: .35, transparent: true, opacity: .75
+        });
+        const panelW = dW / 2 - .04, panelH = dH - .1;
+        const leftPanel = new THREE.Mesh(new THREE.BoxGeometry(panelW, panelH, .05), panelMat);
+        leftPanel.position.set(-panelW / 2 - .02, panelH / 2 + .06, dZ - .02); scene.add(leftPanel);
+        const rightPanel = new THREE.Mesh(new THREE.BoxGeometry(panelW, panelH, .05), panelMat);
+        rightPanel.position.set(panelW / 2 + .02, panelH / 2 + .06, dZ - .02); scene.add(rightPanel);
+
+        // Door panel horizontal bars (detail)
+        [1.5, 3.2, 5.1].forEach(y => {
+          const bar = new THREE.Mesh(new THREE.BoxGeometry(dW - .1, .06, .07), frameMat);
+          bar.position.set(0, y, dZ + .01); scene.add(bar);
+        });
+
+        // Centre divider strip
+        const divider = new THREE.Mesh(new THREE.BoxGeometry(.1, dH - .1, .08), frameMat);
+        divider.position.set(0, panelH / 2 + .06, dZ + .01); scene.add(divider);
+
+        // Door handles
+        const handleMat = new THREE.MeshStandardMaterial({ color: 0xddcc88, roughness: .15, metalness: .9 });
+        [-1, 1].forEach(side => {
+          const hx = side * .38;
+          const handleBase = new THREE.Mesh(new THREE.BoxGeometry(.04, .22, .04), handleMat);
+          handleBase.position.set(hx, 2.2, dZ + .07); scene.add(handleBase);
+          const handleBar = new THREE.Mesh(new THREE.CylinderGeometry(.018, .018, .55, 10), handleMat);
+          handleBar.rotation.z = Math.PI / 2; handleBar.position.set(hx + side * .28, 2.2, dZ + .09); scene.add(handleBar);
+          const handleEnd = new THREE.Mesh(new THREE.SphereGeometry(.025, 8, 8), handleMat);
+          handleEnd.position.set(hx + side * .56, 2.2, dZ + .09); scene.add(handleEnd);
+        });
+
+        // Keypad panel (right of door)
+        const keypadBase = new THREE.Mesh(new THREE.BoxGeometry(.28, .5, .07), new THREE.MeshStandardMaterial({ color: 0x223344, roughness: .4, metalness: .6 }));
+        keypadBase.position.set(dW / 2 + fT + .22, 2.4, dZ); scene.add(keypadBase);
+        const keypadScreen = new THREE.Mesh(new THREE.PlaneGeometry(.18, .12), new THREE.MeshBasicMaterial({ color: 0x00ff88 }));
+        keypadScreen.position.set(dW / 2 + fT + .22, 2.62, dZ + .04); scene.add(keypadScreen);
+        for (let row = 0; row < 3; row++) {
+          for (let col = 0; col < 3; col++) {
+            const btn = new THREE.Mesh(new THREE.BoxGeometry(.055, .055, .03), new THREE.MeshStandardMaterial({ color: 0x334455, roughness: .3, metalness: .5 }));
+            btn.position.set(dW / 2 + fT + .22 - .066 + col * .066, 2.44 - row * .066, dZ + .04); scene.add(btn);
+          }
+        }
+
+        // Green ambient glow light for door
+        const doorGlow = new THREE.PointLight(0x00ff88, .8, 6);
+        doorGlow.position.set(0, 3.5, hd - 1.5); scene.add(doorGlow);
+        // Animate door glow pulsing
+        doorGlow.userData.isDoorGlow = true;
+      })();
+
 
       // ── REAGENT SHELVES (left wall) ──
-      function addShelf(wx, y, wz) {
-        const shM = new THREE.MeshStandardMaterial({ color: 0x667788, roughness: 0.4, metalness: 0.35 });
-        const sh = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.06, 0.38), shM); sh.position.set(wx, y, wz); scene.add(sh);
-        // Shelf back panel
-        const bp = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.5, 4.2), shM); bp.position.set(wx - 0.17, y - 0.25, wz); scene.add(bp);
+      function addShelf(swx, sy, swz) {
+        const shM = new THREE.MeshStandardMaterial({ color: 0x667788, roughness: .4, metalness: .35 });
+        const sh = new THREE.Mesh(new THREE.BoxGeometry(4.2, .06, .38), shM); sh.position.set(swx, sy, swz); scene.add(sh);
+        const sbp = new THREE.Mesh(new THREE.BoxGeometry(.04, .5, 4.2), shM); sbp.position.set(swx - .17, sy - .25, swz); scene.add(sbp);
         const bottles = [
           { name: 'HCl', col: 0xff4444, dx: -1.65 }, { name: 'NaOH', col: 0xff8800, dx: -1.05 },
-          { name: 'H\u2082O\u2082', col: 0x4488ff, dx: -0.45 }, { name: 'EtOH', col: 0x44bb44, dx: 0.15 },
-          { name: 'HNO\u2083', col: 0xffcc00, dx: 0.75 }, { name: 'Buffer', col: 0xaa44ff, dx: 1.35 },
+          { name: 'H\u2082O\u2082', col: 0x4488ff, dx: -.45 }, { name: 'EtOH', col: 0x44bb44, dx: .15 },
+          { name: 'HNO\u2083', col: 0xffcc00, dx: .75 }, { name: 'Buffer', col: 0xaa44ff, dx: 1.35 },
         ];
         bottles.forEach(({ name, col, dx }) => {
-          const bh = 0.27 + Math.random() * 0.1;
-          const bm = new THREE.MeshStandardMaterial({ color: col, transparent: true, opacity: 0.7, roughness: 0.1 });
-          const bot = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.075, bh, 10), bm);
-          bot.position.set(wx + dx, y + bh / 2 + 0.04, wz); scene.add(bot);
-          const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.04, 10), new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8 }));
-          cap.position.set(wx + dx, y + bh + 0.06, wz); scene.add(cap);
-          const lbl = new THREE.Mesh(new THREE.PlaneGeometry(0.11, 0.055), new THREE.MeshStandardMaterial({ map: makeBottleLabelTex(name, '#' + col.toString(16).padStart(6, '0')), roughness: 0.5 }));
-          lbl.position.set(wx + dx, y + bh * 0.45 + 0.04, wz + 0.08); scene.add(lbl);
+          const bh = .27 + Math.random() * .1;
+          const bm = new THREE.MeshStandardMaterial({ color: col, transparent: true, opacity: .7, roughness: .1 });
+          const bot = new THREE.Mesh(new THREE.CylinderGeometry(.065, .075, bh, 10), bm);
+          bot.position.set(swx + dx, sy + bh / 2 + .04, swz); scene.add(bot);
+          const cap = new THREE.Mesh(new THREE.CylinderGeometry(.07, .07, .04, 10), new THREE.MeshStandardMaterial({ color: 0x222222, roughness: .8 }));
+          cap.position.set(swx + dx, sy + bh + .06, swz); scene.add(cap);
+          const shlbl = new THREE.Mesh(new THREE.PlaneGeometry(.11, .055), new THREE.MeshStandardMaterial({ map: makeBottleLabelTex(name, '#' + col.toString(16).padStart(6, '0')), roughness: .5 }));
+          shlbl.position.set(swx + dx, sy + bh * .45 + .04, swz + .08); scene.add(shlbl);
         });
       }
-      addShelf(-hw + 0.55, 4.5, -10); addShelf(-hw + 0.55, 3.4, -10);
-      addShelf(-hw + 0.55, 4.5, 6); addShelf(-hw + 0.55, 3.4, 6);
+      addShelf(-hw + .55, 4.5, -10); addShelf(-hw + .55, 3.4, -10);
+      addShelf(-hw + .55, 4.5, 6); addShelf(-hw + .55, 3.4, 6);
 
       // ── FIRE EXTINGUISHERS ──
-      function addFireExt(x, z) {
-        const rM = new THREE.MeshStandardMaterial({ color: 0xcc2200, roughness: 0.3, metalness: 0.5 });
-        const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.72, 12), rM); tank.position.set(x, 0.5, z); scene.add(tank);
-        const top = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), rM); top.position.set(x, 0.86, z); scene.add(top);
-        const hose = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.3, 8), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 }));
-        hose.rotation.z = Math.PI / 4; hose.position.set(x + 0.15, 0.96, z); scene.add(hose);
-        const brk = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.5, 0.08), rM); brk.position.set(x, 0.5, z + 0.18); scene.add(brk);
+      function addFireExt(ex, ez) {
+        const rM = new THREE.MeshStandardMaterial({ color: 0xcc2200, roughness: .3, metalness: .5 });
+        const tank = new THREE.Mesh(new THREE.CylinderGeometry(.12, .12, .72, 12), rM); tank.position.set(ex, .5, ez); scene.add(tank);
+        const etop = new THREE.Mesh(new THREE.SphereGeometry(.12, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), rM); etop.position.set(ex, .86, ez); scene.add(etop);
+        const hose = new THREE.Mesh(new THREE.CylinderGeometry(.014, .014, .3, 8), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: .8 }));
+        hose.rotation.z = Math.PI / 4; hose.position.set(ex + .15, .96, ez); scene.add(hose);
       }
-      addFireExt(-hw + 0.3, -hd + 0.45); addFireExt(hw - 0.3, -hd + 0.45); addFireExt(-hw + 0.3, hd - 0.45);
+      addFireExt(-hw + .3, -hd + .45); addFireExt(hw - .3, -hd + .45); addFireExt(-hw + .3, hd - .45);
 
       // ── EYEWASH STATIONS ──
-      function addEyewash(x, z) {
-        const gM = new THREE.MeshStandardMaterial({ color: 0x33aa44, roughness: 0.3, metalness: 0.3 });
-        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.20, 0.9, 12), gM); base.position.set(x, 0.45, z); scene.add(base);
-        const bowl = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xeef8ee, roughness: 0.15 }));
-        bowl.rotation.x = Math.PI; bowl.position.set(x, 0.9, z); scene.add(bowl);
-        const sign = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.24), new THREE.MeshStandardMaterial({ map: makeHazardTex('EYEWASH', '#00aa44'), roughness: 0.6 }));
-        sign.position.set(x, 1.48, z + 0.06); scene.add(sign);
+      function addEyewash(ex, ez) {
+        const gM = new THREE.MeshStandardMaterial({ color: 0x33aa44, roughness: .3, metalness: .3 });
+        const ewbase = new THREE.Mesh(new THREE.CylinderGeometry(.18, .20, .9, 12), gM); ewbase.position.set(ex, .45, ez); scene.add(ewbase);
+        const bowl = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xeef8ee, roughness: .15 }));
+        bowl.rotation.x = Math.PI; bowl.position.set(ex, .9, ez); scene.add(bowl);
+        const ewsign = new THREE.Mesh(new THREE.PlaneGeometry(.55, .24), new THREE.MeshStandardMaterial({ map: makeHazardTex('EYEWASH', '#00aa44'), roughness: .6 }));
+        ewsign.position.set(ex, 1.48, ez + .06); scene.add(ewsign);
       }
-      addEyewash(22, -hd + 0.5); addEyewash(-22, -hd + 0.5);
+      addEyewash(22, -hd + .5); addEyewash(-22, -hd + .5);
 
       // ── SINKS (left wall) ──
-      function addSink(x, z) {
-        const sM = new THREE.MeshStandardMaterial({ color: 0x8899aa, roughness: 0.5 });
-        const base = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.9, 0.58), sM); base.position.set(x, 0.45, z); scene.add(base);
-        const top = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.06, 0.58), new THREE.MeshStandardMaterial({ color: 0xd4e0e8, roughness: 0.2, metalness: 0.3 }));
-        top.position.set(x, 0.92, z); scene.add(top);
-        const basin = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.14, 0.38), new THREE.MeshStandardMaterial({ color: 0xeaf4f8, roughness: 0.1 }));
-        basin.position.set(x, 0.87, z); scene.add(basin);
-        const fM = new THREE.MeshStandardMaterial({ color: 0xc8d4dc, roughness: 0.1, metalness: 0.9 });
-        const fb = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.24, 8), fM); fb.position.set(x, 1.1, z - 0.14); scene.add(fb);
-        const fa = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.18, 8), fM); fa.rotation.x = Math.PI / 4; fa.position.set(x, 1.21, z - 0.08); scene.add(fa);
+      function addSink(skx, skz) {
+        const sM = new THREE.MeshStandardMaterial({ color: 0x8899aa, roughness: .5 });
+        const skbase = new THREE.Mesh(new THREE.BoxGeometry(1.2, .9, .58), sM); skbase.position.set(skx, .45, skz); scene.add(skbase);
+        const sktop = new THREE.Mesh(new THREE.BoxGeometry(1.2, .06, .58), new THREE.MeshStandardMaterial({ color: 0xd4e0e8, roughness: .2, metalness: .3 }));
+        sktop.position.set(skx, .92, skz); scene.add(sktop);
+        const basin = new THREE.Mesh(new THREE.BoxGeometry(.68, .14, .38), new THREE.MeshStandardMaterial({ color: 0xeaf4f8, roughness: .1 }));
+        basin.position.set(skx, .87, skz); scene.add(basin);
+        const fM = new THREE.MeshStandardMaterial({ color: 0xc8d4dc, roughness: .1, metalness: .9 });
+        const fb = new THREE.Mesh(new THREE.CylinderGeometry(.028, .028, .24, 8), fM); fb.position.set(skx, 1.1, skz - .14); scene.add(fb);
+        const fa = new THREE.Mesh(new THREE.CylinderGeometry(.018, .018, .18, 8), fM); fa.rotation.x = Math.PI / 4; fa.position.set(skx, 1.21, skz - .08); scene.add(fa);
       }
-      addSink(-hw + 0.45, -6); addSink(-hw + 0.45, 5); addSink(-hw + 0.45, 15);
+      addSink(-hw + .45, -6); addSink(-hw + .45, 5); addSink(-hw + .45, 15);
 
       // ── WALL OUTLETS ──
-      const plM = new THREE.MeshStandardMaterial({ color: 0xeef4f8, roughness: 0.7 });
-      for (let wz = -20; wz <= 20; wz += 6) {
-        [-hw + 0.04, hw - 0.04].forEach((wx, si) => {
-          const pl = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.02), plM);
-          pl.position.set(wx, 1.4, wz); pl.rotation.y = si === 0 ? Math.PI / 2 : -Math.PI / 2; scene.add(pl);
+      const plM = new THREE.MeshStandardMaterial({ color: 0xeef4f8, roughness: .7 });
+      for (let woz = -20; woz <= 20; woz += 6) {
+        [-hw + .04, hw - .04].forEach((wox, si) => {
+          const pl = new THREE.Mesh(new THREE.BoxGeometry(.12, .18, .02), plM);
+          pl.position.set(wox, 1.4, woz); pl.rotation.y = si === 0 ? Math.PI / 2 : -Math.PI / 2; scene.add(pl);
         });
       }
 
-      // ── LAB TABLES ──
-      function makeLabTable(x, z) {
-        const g = new THREE.Group();
-        const topM = new THREE.MeshStandardMaterial({ color: 0xf0f4f8, roughness: 0.3, metalness: 0.05 });
-        const top = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.08, 1.8), topM); top.position.y = 1.8; top.castShadow = true; top.receiveShadow = true; g.add(top);
-        const edgeM = new THREE.MeshStandardMaterial({ color: 0x2a3a4a, roughness: 0.4, metalness: 0.2 });
-        [0.92, -0.92].forEach(ez => { const e = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.09, 0.04), edgeM); e.position.set(0, 1.8, ez); g.add(e); });
-        const cabM = new THREE.MeshStandardMaterial({ color: 0x9aafbf, roughness: 0.6, metalness: 0.05 });
-        const cab = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.9, 1.6), cabM); cab.position.y = 1.3; cab.castShadow = true; g.add(cab);
-        const doorM = new THREE.MeshStandardMaterial({ color: 0xb0c4d4, roughness: 0.4, metalness: 0.08 });
-        [-0.76, 0.76].forEach(dx => {
-          const d = new THREE.Mesh(new THREE.BoxGeometry(1.38, 0.82, 0.04), doorM); d.position.set(dx, 1.3, 0.82); g.add(d);
-          const hnd = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.35, 8), new THREE.MeshStandardMaterial({ color: 0xe0e8f0, roughness: 0.2, metalness: 0.8 }));
-          hnd.rotation.z = Math.PI / 2; hnd.position.set(dx, 1.3, 0.87); g.add(hnd);
+      // ── LAB TABLES + DRUG LABELS (enhanced design) ──
+      const labelMeshes = [];
+      const tPos = [[-18, -12], [-8, -12], [2, -12], [12, -12], [-18, 3], [-8, 3], [2, 3], [12, 3], [-18, 16], [-8, 16], [2, 16], [12, 16]];
+
+      tPos.forEach(([tx, tz], i) => {
+        const drug = DRUGS[i] || null;
+        // Table top
+        const top = new THREE.Mesh(new THREE.BoxGeometry(3.2, .08, 1.8), new THREE.MeshStandardMaterial({ color: 0xf0f4f8, roughness: .3, metalness: .05 }));
+        top.position.set(tx, 1.84, tz); top.castShadow = true; scene.add(top);
+        // Table edges
+        const edgeM = new THREE.MeshStandardMaterial({ color: 0x2a3a4a, roughness: .4, metalness: .2 });
+        [.92, -.92].forEach(ez => { const e = new THREE.Mesh(new THREE.BoxGeometry(3.2, .09, .04), edgeM); e.position.set(tx, 1.84, tz + ez); scene.add(e); });
+        // Cabinet body
+        const cab = new THREE.Mesh(new THREE.BoxGeometry(3, .9, 1.6), new THREE.MeshStandardMaterial({ color: 0x9aafbf, roughness: .6 }));
+        cab.position.set(tx, 1.3, tz); cab.castShadow = true; scene.add(cab);
+        // Cabinet doors with handles
+        const doorM = new THREE.MeshStandardMaterial({ color: 0xb0c4d4, roughness: .4, metalness: .08 });
+        [-.76, .76].forEach(dx => {
+          const d = new THREE.Mesh(new THREE.BoxGeometry(1.38, .82, .04), doorM); d.position.set(tx + dx, 1.3, tz + .82); scene.add(d);
+          const hnd = new THREE.Mesh(new THREE.CylinderGeometry(.025, .025, .35, 8), new THREE.MeshStandardMaterial({ color: 0xe0e8f0, roughness: .2, metalness: .8 }));
+          hnd.rotation.z = Math.PI / 2; hnd.position.set(tx + dx, 1.3, tz + .87); scene.add(hnd);
         });
-        const legM = new THREE.MeshStandardMaterial({ color: 0xd0d8e0, roughness: 0.3, metalness: 0.7 });
-        [[-1.4, 0.7], [1.4, 0.7], [-1.4, -0.7], [1.4, -0.7]].forEach(([lx, lz]) => {
-          const leg = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.84, 0.07), legM); leg.position.set(lx, 0.42, lz); leg.castShadow = true; g.add(leg);
-          const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.05, 8), new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.9 }));
-          foot.position.set(lx, 0.025, lz); g.add(foot);
+        // Legs with foot pads
+        const legM = new THREE.MeshStandardMaterial({ color: 0xd0d8e0, roughness: .3, metalness: .7 });
+        [[-1.4, .7], [1.4, .7], [-1.4, -.7], [1.4, -.7]].forEach(([lx, lz]) => {
+          const leg = new THREE.Mesh(new THREE.BoxGeometry(.07, .84, .07), legM); leg.position.set(tx + lx, .42, tz + lz); leg.castShadow = true; scene.add(leg);
+          const foot = new THREE.Mesh(new THREE.CylinderGeometry(.05, .06, .05, 8), new THREE.MeshStandardMaterial({ color: 0x444444, roughness: .9 }));
+          foot.position.set(tx + lx, .025, tz + lz); scene.add(foot);
         });
-        const brM = new THREE.MeshStandardMaterial({ color: 0xc0c8d0, roughness: 0.4, metalness: 0.5 });
-        const br = new THREE.Mesh(new THREE.BoxGeometry(2.82, 0.05, 0.05), brM); br.position.y = 0.6; g.add(br);
+        // Cross brace
+        const br = new THREE.Mesh(new THREE.BoxGeometry(2.82, .05, .05), new THREE.MeshStandardMaterial({ color: 0xc0c8d0, roughness: .4, metalness: .5 }));
+        br.position.set(tx, .6, tz); scene.add(br);
         // Gas tap
-        const tapM = new THREE.MeshStandardMaterial({ color: 0x0044aa, roughness: 0.3, metalness: 0.6 });
-        const tapB = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.08, 8), new THREE.MeshStandardMaterial({ color: 0x334455, roughness: 0.3, metalness: 0.7 }));
-        tapB.position.set(1.2, 1.86, 0); g.add(tapB);
-        const tapH = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.02, 0.04), tapM); tapH.position.set(1.2, 1.95, 0); g.add(tapH);
+        const tapB = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, .08, 8), new THREE.MeshStandardMaterial({ color: 0x334455, roughness: .3, metalness: .7 }));
+        tapB.position.set(tx + 1.2, 1.86, tz); scene.add(tapB);
+        const tapH = new THREE.Mesh(new THREE.BoxGeometry(.1, .02, .04), new THREE.MeshStandardMaterial({ color: 0x0044aa, roughness: .3, metalness: .6 }));
+        tapH.position.set(tx + 1.2, 1.95, tz); scene.add(tapH);
         // Water tap
-        const wtM = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.1, metalness: 0.9 });
-        const wt = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.14, 8), wtM); wt.rotation.z = Math.PI / 6; wt.position.set(0.9, 1.93, 0); g.add(wt);
-        g.position.set(x, 0, z); scene.add(g);
-        return g;
-      }
-
-      function addEquipment(x, z) {
-        const eqM = new THREE.MeshStandardMaterial({ color: 0x2a3a4a, roughness: 0.4, metalness: 0.6 });
-        // Microscope
-        const mB = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 0.06, 12), eqM); mB.position.set(x, 1.87, z); scene.add(mB);
-        const mA = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.68, 8), eqM); mA.position.set(x, 2.22, z); scene.add(mA);
-        const mH = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.17, 0.14), new THREE.MeshStandardMaterial({ color: 0x1a2a3a, roughness: 0.3, metalness: 0.7 }));
-        mH.position.set(x + 0.12, 2.56, z); scene.add(mH);
-        const ep = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 0.12, 8), new THREE.MeshStandardMaterial({ color: 0x111, roughness: 0.2, metalness: 0.5 }));
-        ep.position.set(x + 0.12, 2.67, z); scene.add(ep);
-        // Beaker
-        const bkM = new THREE.MeshStandardMaterial({ color: 0x88c8ff, transparent: true, opacity: 0.45, roughness: 0.05 });
-        const bk = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.22, 12), bkM); bk.position.set(x - 0.5, 1.95, z + 0.2); scene.add(bk);
-        const lqM = new THREE.MeshStandardMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.7, roughness: 0.1 });
-        const lq = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.06, 0.12, 12), lqM); lq.position.set(x - 0.5, 1.9, z + 0.2); scene.add(lq);
+        const wt = new THREE.Mesh(new THREE.CylinderGeometry(.022, .022, .14, 8), new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: .1, metalness: .9 }));
+        wt.rotation.z = Math.PI / 6; wt.position.set(tx + .9, 1.93, tz); scene.add(wt);
+        // Beaker + drug-colored liquid
+        const bk = new THREE.Mesh(new THREE.CylinderGeometry(.09, .07, .22, 12), new THREE.MeshStandardMaterial({ color: 0x88c8ff, transparent: true, opacity: .45 }));
+        bk.position.set(tx - .5, 1.97, tz + .2); scene.add(bk);
+        if (drug) {
+          const lc = new THREE.Color(drug.col);
+          const lq = new THREE.Mesh(new THREE.CylinderGeometry(.075, .06, .12, 12), new THREE.MeshStandardMaterial({ color: lc, transparent: true, opacity: .85, emissive: lc, emissiveIntensity: .4 }));
+          lq.position.set(tx - .5, 1.91, tz + .2); scene.add(lq);
+          const gl = new THREE.PointLight(new THREE.Color(drug.col), .4, 4);
+          gl.position.set(tx, 2.5, tz); scene.add(gl);
+        }
         // Petri dish
-        const dsM = new THREE.MeshStandardMaterial({ color: 0xeef4ff, transparent: true, opacity: 0.5, roughness: 0.1 });
-        const ds = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.03, 16), dsM); ds.position.set(x + 0.4, 1.855, z - 0.2); scene.add(ds);
+        const dish = new THREE.Mesh(new THREE.CylinderGeometry(.14, .14, .03, 16), new THREE.MeshStandardMaterial({ color: 0xeef4ff, transparent: true, opacity: .5 }));
+        dish.position.set(tx + .4, 1.855, tz - .2); scene.add(dish);
+        // Microscope
+        const eqM = new THREE.MeshStandardMaterial({ color: 0x2a3a4a, roughness: .4, metalness: .6 });
+        const mB = new THREE.Mesh(new THREE.CylinderGeometry(.22, .28, .06, 12), eqM); mB.position.set(tx + .3, 1.87, tz); scene.add(mB);
+        const mA = new THREE.Mesh(new THREE.CylinderGeometry(.04, .04, .68, 8), eqM); mA.position.set(tx + .3, 2.22, tz); scene.add(mA);
+        const mH = new THREE.Mesh(new THREE.BoxGeometry(.2, .17, .14), new THREE.MeshStandardMaterial({ color: 0x1a2a3a, roughness: .3, metalness: .7 }));
+        mH.position.set(tx + .42, 2.56, tz); scene.add(mH);
         // Erlenmeyer flask
-        const flM = new THREE.MeshStandardMaterial({ color: 0x99ddff, transparent: true, opacity: 0.5, roughness: 0.05 });
-        const flB = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.14, 10), flM); flB.position.set(x - 0.35, 1.93, z - 0.25); scene.add(flB);
-        const flN = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.1, 0.11, 10), flM); flN.position.set(x - 0.35, 2.03, z - 0.25); scene.add(flN);
+        const flM = new THREE.MeshStandardMaterial({ color: 0x99ddff, transparent: true, opacity: .5, roughness: .05 });
+        const flB = new THREE.Mesh(new THREE.CylinderGeometry(.1, .12, .14, 10), flM); flB.position.set(tx - .35, 1.93, tz - .25); scene.add(flB);
+        const flN = new THREE.Mesh(new THREE.CylinderGeometry(.032, .1, .11, 10), flM); flN.position.set(tx - .35, 2.03, tz - .25); scene.add(flN);
         // Notebook + pen
-        const nb = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.02, 0.17), new THREE.MeshStandardMaterial({ color: 0x223355, roughness: 0.8 }));
-        nb.position.set(x + 0.65, 1.85, z + 0.3); nb.rotation.y = 0.2; scene.add(nb);
-        const pn = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.2, 6), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5 }));
-        pn.rotation.z = Math.PI / 2; pn.position.set(x + 0.65, 1.87, z + 0.42); scene.add(pn);
-      }
-
-      [[-15, -15], [-5, -15], [5, -15], [15, -15], [-15, 0], [-5, 0], [5, 0], [15, 0], [-15, 15], [-5, 15], [5, 15], [15, 15]].forEach(([x, z]) => {
-        makeLabTable(x, z); addEquipment(x, z);
+        const nb = new THREE.Mesh(new THREE.BoxGeometry(.24, .02, .17), new THREE.MeshStandardMaterial({ color: 0x223355, roughness: .8 }));
+        nb.position.set(tx + .65, 1.85, tz + .3); nb.rotation.y = .2; scene.add(nb);
+        const pn = new THREE.Mesh(new THREE.CylinderGeometry(.008, .008, .2, 6), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: .5 }));
+        pn.rotation.z = Math.PI / 2; pn.position.set(tx + .65, 1.87, tz + .42); scene.add(pn);
+        // Drug label (floating billboard)
+        if (drug) {
+          const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(3, 1.5), new THREE.MeshBasicMaterial({ map: makeDrugTex(drug), transparent: true, side: THREE.DoubleSide, depthWrite: false }));
+          labelMesh.position.set(tx, 3.1, tz);
+          labelMesh.userData.drug = drug;
+          scene.add(labelMesh);
+          labelMeshes.push(labelMesh);
+          const gf = new THREE.Mesh(new THREE.PlaneGeometry(3.15, 1.6), new THREE.MeshBasicMaterial({ color: new THREE.Color(drug.col), transparent: true, opacity: .07, side: THREE.DoubleSide, depthWrite: false }));
+          gf.position.set(tx, 3.1, tz - .02); scene.add(gf);
+        }
       });
+
+      // ── BILLBOARD 1: T2DM Clinical Reference (front wall) ──
+      const postM = new THREE.MeshStandardMaterial({ color: 0x445566, roughness: .4, metalness: .7 });
+      const bb1x = -13;
+      [-4.8, 4.8].forEach(dx => {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(.2, 5.5, .2), postM);
+        post.position.set(bb1x + dx, 3.75, RD / 2 - 1.6); scene.add(post);
+      });
+      const cb1 = new THREE.Mesh(new THREE.BoxGeometry(10.5, .2, .2), postM); cb1.position.set(bb1x, 6.6, RD / 2 - 1.6); scene.add(cb1);
+      const backing1 = new THREE.Mesh(new THREE.BoxGeometry(9.8, 4.6, .1), new THREE.MeshStandardMaterial({ color: 0x030c18, roughness: .9 }));
+      backing1.position.set(bb1x, 4.4, RD / 2 - 1.55); scene.add(backing1);
+      const bill1 = new THREE.Mesh(new THREE.PlaneGeometry(9.6, 4.5), new THREE.MeshBasicMaterial({ map: makeBillTex() }));
+      bill1.position.set(bb1x, 4.4, RD / 2 - 1.65); bill1.rotation.y = Math.PI; scene.add(bill1);
+      const spot1 = new THREE.SpotLight(0xffffff, 2, 20, Math.PI / 5, .4);
+      spot1.position.set(bb1x, 8.5, RD / 2 - 7); spot1.target.position.set(bb1x, 4.4, RD / 2 - 1.6); scene.add(spot1); scene.add(spot1.target);
+      const bgs1 = new THREE.Mesh(new THREE.BoxGeometry(9.8, .08, .08), new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: .6 }));
+      bgs1.position.set(bb1x, 6.7, RD / 2 - 1.66); scene.add(bgs1);
+
+      // ── BILLBOARD 2: Patient Silhouette (front wall) ──
+      const bb2x = 13;
+      [-4.8, 4.8].forEach(dx => {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(.2, 5.5, .2), postM);
+        post.position.set(bb2x + dx, 3.75, RD / 2 - 1.6); scene.add(post);
+      });
+      const cb2 = new THREE.Mesh(new THREE.BoxGeometry(10.5, .2, .2), postM); cb2.position.set(bb2x, 6.6, RD / 2 - 1.6); scene.add(cb2);
+      const backing2 = new THREE.Mesh(new THREE.BoxGeometry(9.8, 4.6, .1), new THREE.MeshStandardMaterial({ color: 0x030c18, roughness: .9 }));
+      backing2.position.set(bb2x, 4.4, RD / 2 - 1.55); scene.add(backing2);
+      const bill2 = new THREE.Mesh(new THREE.PlaneGeometry(9.6, 4.5), new THREE.MeshBasicMaterial({ map: makePatientTex() }));
+      bill2.position.set(bb2x, 4.4, RD / 2 - 1.65); bill2.rotation.y = Math.PI; scene.add(bill2);
+      const spot2 = new THREE.SpotLight(0xffffff, 2, 20, Math.PI / 5, .4);
+      spot2.position.set(bb2x, 8.5, RD / 2 - 7); spot2.target.position.set(bb2x, 4.4, RD / 2 - 1.6); scene.add(spot2); scene.add(spot2.target);
+      const bgs2 = new THREE.Mesh(new THREE.BoxGeometry(9.8, .08, .08), new THREE.MeshBasicMaterial({ color: 0xff8844, transparent: true, opacity: .6 }));
+      bgs2.position.set(bb2x, 6.7, RD / 2 - 1.66); scene.add(bgs2);
 
       // ── PLAYER ──
       const player = new THREE.Group(); scene.add(player);
-      const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.4, 0.4), new THREE.MeshStandardMaterial({ color: 0xeef4ff, roughness: 0.9 }));
-      body.position.y = 2.1; body.castShadow = true; player.add(body);
-      const head = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.6, 0.55), new THREE.MeshStandardMaterial({ color: 0xffccaa, roughness: 0.9 }));
-      head.position.y = 3.2; head.castShadow = true; player.add(head);
-      const legM = new THREE.MeshStandardMaterial({ color: 0x334455, roughness: 0.9 });
-      const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.28, 1.0, 0.28), legM); leftLeg.position.set(-0.2, 1.0, 0); leftLeg.castShadow = true; player.add(leftLeg);
-      const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.28, 1.0, 0.28), legM); rightLeg.position.set(0.2, 1.0, 0); rightLeg.castShadow = true; player.add(rightLeg);
+      const body = new THREE.Mesh(new THREE.BoxGeometry(.7, 1.4, .4), new THREE.MeshStandardMaterial({ color: 0xeef4ff, roughness: .9 })); body.position.y = 2.1; body.castShadow = true; player.add(body);
+      const headM = new THREE.Mesh(new THREE.BoxGeometry(.55, .6, .55), new THREE.MeshStandardMaterial({ color: 0xffccaa, roughness: .9 })); headM.position.y = 3.2; headM.castShadow = true; player.add(headM);
+      const lLeg = new THREE.Mesh(new THREE.BoxGeometry(.28, 1, .28), new THREE.MeshStandardMaterial({ color: 0x334455, roughness: .9 })); lLeg.position.set(-.2, 1, 0); lLeg.castShadow = true; player.add(lLeg);
+      const rLeg = new THREE.Mesh(new THREE.BoxGeometry(.28, 1, .28), new THREE.MeshStandardMaterial({ color: 0x334455, roughness: .9 })); rLeg.position.set(.2, 1, 0); rLeg.castShadow = true; player.add(rLeg);
       player.position.set(0, 0, 6);
 
-      // ── CONTROLS ──
+      // Controls
       const keys = {};
-      document.addEventListener("keydown", e => {
-        keys[e.code] = true;
-        if (e.code === "Digit5") { firstPerson = !firstPerson; modeIndicator.textContent = firstPerson ? "FIRST PERSON" : "THIRD PERSON"; }
-      });
+      document.addEventListener("keydown", e => { keys[e.code] = true; if (e.code === "Digit5") { fp = !fp; modeIndicator.textContent = fp ? "FIRST PERSON" : "THIRD PERSON"; } });
       document.addEventListener("keyup", e => keys[e.code] = false);
+      let fp = true, wt = 0, tgt = null;
+      const half = RW / 2 - 1, spd = .15;
 
-      let firstPerson = true, walkTime = 0;
-      const half = roomW / 2 - 1;
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-      let targetPos = null;
-      const moveSpeed = 0.15;
+      // ── TRANSITION STATE ──
+      let portalArmed = false;  // becomes true once player is ready after spawn
 
-      const markerMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, side: THREE.DoubleSide });
-      const clickMarker = new THREE.Mesh(new THREE.RingGeometry(0.2, 0.3, 32), markerMat);
-      clickMarker.rotation.x = -Math.PI / 2; clickMarker.position.y = 0.05; clickMarker.visible = false; scene.add(clickMarker);
-      const pulseMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
-      const pulseRing = new THREE.Mesh(new THREE.RingGeometry(0.25, 0.33, 32), pulseMat);
-      pulseRing.rotation.x = -Math.PI / 2; pulseRing.position.y = 0.06; pulseRing.visible = false; scene.add(pulseRing);
+      // Door prompt overlay (shows near exit door)
+      const dpEl = (function () {
+        const el = document.createElement('div');
+        el.style.cssText = [
+          'position:fixed', 'bottom:72px', 'left:50%', 'transform:translateX(-50%)',
+          'font-family:"Share Tech Mono",monospace', 'color:#00ff88',
+          'font-size:13px', 'letter-spacing:3px', 'background:rgba(2,8,16,.88)',
+          'backdrop-filter:blur(10px)', 'padding:9px 26px',
+          'border-radius:40px', 'border:1px solid rgba(0,255,136,.45)',
+          'z-index:50', 'display:none', 'pointer-events:none',
+          'white-space:nowrap'
+        ].join(';');
+        el.innerHTML = '▶ &nbsp;ENTER DOOR &nbsp;— &nbsp;DR. CHEN\'S OFFICE';
+        document.body.appendChild(el);
+        // pulse animation
+        const s = document.createElement('style');
+        s.textContent = '@keyframes _dp{0%,100%{box-shadow:0 0 10px rgba(0,255,136,.25)}50%{box-shadow:0 0 22px rgba(0,255,136,.65)}}';
+        document.head.appendChild(s);
+        el.style.animation = '_dp 1.6s ease-in-out infinite';
+        return el;
+      })();
 
-      window.addEventListener('mousedown', event => {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera);
-        const hits = raycaster.intersectObject(floor);
-        if (hits.length > 0) {
-          const pt = hits[0].point;
+      // Glowing floor marker near door (so player can see where to walk)
+      (function addDoorMarker() {
+        const mat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: .18, side: THREE.DoubleSide });
+        const ring = new THREE.Mesh(new THREE.RingGeometry(1.2, 2.0, 48), mat);
+        ring.rotation.x = -Math.PI / 2; ring.position.set(0, .02, 23); scene.add(ring);
+        const inner = new THREE.Mesh(new THREE.CircleGeometry(1.1, 48), new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: .07, side: THREE.DoubleSide }));
+        inner.rotation.x = -Math.PI / 2; inner.position.set(0, .01, 23); scene.add(inner);
+      })();
+
+      // Click marker
+      const cm = new THREE.Mesh(new THREE.RingGeometry(.2, .3, 32), new THREE.MeshBasicMaterial({ color: 0x00ff88, side: THREE.DoubleSide }));
+      cm.rotation.x = -Math.PI / 2; cm.position.y = .05; cm.visible = false; scene.add(cm);
+      const pmMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: .5, side: THREE.DoubleSide });
+      const pr = new THREE.Mesh(new THREE.RingGeometry(.25, .32, 32), pmMat); pr.rotation.x = -Math.PI / 2; pr.position.y = .06; pr.visible = false; scene.add(pr);
+
+      // Drug panel + patient panel
+      const dp = document.getElementById("drugPanel");
+      const pp2 = document.getElementById("patientPanel");
+      const adminBtn = document.getElementById("adminBtn");
+      document.getElementById("closeDrug").onclick = () => { dp.style.display = "none"; currentDrug = null; };
+      document.getElementById("closePatient").onclick = () => { pp2.style.display = "none"; };
+      document.getElementById("checkRegimenBtn").onclick = checkRegimen;
+
+      adminBtn.onclick = () => {
+        if (currentDrug) {
+          addToRegimen(currentDrug);
+          adminBtn.textContent = "ADMINISTERED ✓";
+          adminBtn.classList.add("administered");
+        }
+      };
+
+      function showPatientChart() {
+        document.getElementById("ppPresenting").textContent = PATIENT.presenting;
+        document.getElementById("ppVitals").textContent = PATIENT.vitals;
+        document.getElementById("ppLabs").innerHTML =
+          `<span class="lab-val crit">HbA1c: ${PATIENT.hba1c} ↑↑</span>` +
+          `<span class="lab-val crit">FBG: ${PATIENT.fbg} ↑↑</span><br>` +
+          `<span class="lab-val crit">LDL: 158 ↑</span>` +
+          `<span class="lab-val crit">TG: 310 ↑↑</span>` +
+          `<span class="lab-val crit">HDL: 36 ↓</span><br>` +
+          `<span class="lab-val pos">C-peptide: ${PATIENT.cpeptide}</span>`;
+        document.getElementById("ppAb").innerHTML =
+          `<span class="lab-val low">GAD65 neg</span>` +
+          `<span class="lab-val low">IA-2 neg</span>` +
+          `<span style="color:#88aacc;font-size:10px;margin-left:6px;">→ Rules out T1DM / LADA</span>`;
+        document.getElementById("ppDx").textContent = PATIENT.dx;
+        document.getElementById("ppPlan").textContent = PATIENT.plan;
+        pp2.style.display = "block";
+        dp.style.display = "none"; currentDrug = null;
+      }
+
+      bill2.userData.isPatientBoard = true;
+      backing2.userData.isPatientBoard = true;
+      const clickableBoards = [bill2, backing2];
+
+      function showDrug(drug) {
+        currentDrug = drug;
+        document.getElementById("dptitle").textContent = drug.name;
+        document.getElementById("dpclass").textContent = drug.cls;
+        document.getElementById("dpind").textContent = drug.ind;
+        document.getElementById("dpdose").textContent = drug.dose;
+        document.getElementById("dpse").innerHTML = drug.se.map(([t, w]) => `<span class="dtag ${w}">${t}</span>`).join('');
+        document.getElementById("dpmon").textContent = drug.mon;
+        document.getElementById("dpmech").textContent = drug.mech;
+        const alreadyAdded = patientRegimen.find(d => d.name === drug.name);
+        if (alreadyAdded) { adminBtn.textContent = "ADMINISTERED ✓"; adminBtn.classList.add("administered"); }
+        else { adminBtn.textContent = "ADMINISTER TO PATIENT"; adminBtn.classList.remove("administered"); }
+        dp.style.display = "block";
+      }
+
+      const ray = new THREE.Raycaster(); const mo = new THREE.Vector2();
+      let hoveredLabel = null;
+
+      window.addEventListener("mousedown", e => {
+        if (e.target !== labCanvas) return;
+        mo.x = (e.clientX / innerWidth) * 2 - 1;
+        mo.y = -(e.clientY / innerHeight) * 2 + 1;
+        ray.setFromCamera(mo, camera);
+        const lhits = ray.intersectObjects(labelMeshes);
+        if (lhits.length > 0) { pp2.style.display = "none"; showDrug(lhits[0].object.userData.drug); return; }
+        const bhits = ray.intersectObjects(clickableBoards);
+        if (bhits.length > 0) { showPatientChart(); return; }
+        dp.style.display = "none"; currentDrug = null;
+        pp2.style.display = "none";
+        const fhits = ray.intersectObject(floor);
+        if (fhits.length > 0) {
+          const pt = fhits[0].point;
           const cx = Math.max(-half, Math.min(half, pt.x));
           const cz = Math.max(-half, Math.min(half, pt.z));
-          targetPos = new THREE.Vector3(cx, player.position.y, cz);
-          clickMarker.position.set(cx, 0.05, cz); clickMarker.visible = true;
-          pulseRing.position.set(cx, 0.06, cz); pulseRing.visible = true;
+          tgt = new THREE.Vector3(cx, player.position.y, cz);
+          cm.position.x = cx; cm.position.z = cz; cm.visible = true;
+          pr.position.x = cx; pr.position.z = cz; pr.visible = true;
         }
       });
 
-      const tpOffset = new THREE.Vector3(0, 28, 18);
-      let tpCamPos = player.position.clone().add(tpOffset);
+      window.addEventListener("mousemove", e => {
+        if (e.target !== labCanvas) return;
+        mo.x = (e.clientX / innerWidth) * 2 - 1; mo.y = -(e.clientY / innerHeight) * 2 + 1;
+        ray.setFromCamera(mo, camera);
+        const h = ray.intersectObjects(labelMeshes);
+        const bh = ray.intersectObjects(clickableBoards);
+        if (h.length > 0) { labCanvas.style.cursor = "pointer"; hoveredLabel = h[0].object; }
+        else if (bh.length > 0) { labCanvas.style.cursor = "pointer"; hoveredLabel = null; }
+        else { labCanvas.style.cursor = "default"; hoveredLabel = null; }
+      });
 
-      function animateLab() {
-        requestAnimationFrame(animateLab);
-        let walking = false;
-        if (targetPos) {
-          const dist = player.position.distanceTo(targetPos);
-          if (dist > 0.12) {
-            const dir = new THREE.Vector3().subVectors(targetPos, player.position).normalize();
-            player.position.addScaledVector(dir, moveSpeed);
-            const ta = Math.atan2(dir.x, dir.z);
-            let delta = ta - player.rotation.y;
-            while (delta > Math.PI) delta -= Math.PI * 2;
-            while (delta < -Math.PI) delta += Math.PI * 2;
-            player.rotation.y += delta * 0.15;
-            walking = true;
-          } else {
-            targetPos = null; clickMarker.visible = false; pulseRing.visible = false;
-          }
+      const tpOff = new THREE.Vector3(0, 28, 18); let tpPos = new THREE.Vector3().copy(player.position).add(tpOff);
+
+      function loop() {
+        requestAnimationFrame(loop);
+        let walk = false;
+        if (tgt) {
+          const d = player.position.distanceTo(tgt);
+          if (d > .12) {
+            const dir = new THREE.Vector3().subVectors(tgt, player.position).normalize();
+            player.position.addScaledVector(dir, spd);
+            let da = Math.atan2(dir.x, dir.z) - player.rotation.y;
+            while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
+            player.rotation.y += da * .15; walk = true;
+          } else { tgt = null; cm.visible = false; pr.visible = false; }
         }
-        if (keys["KeyQ"]) player.rotation.y += 0.04;
-        if (keys["KeyE"]) player.rotation.y -= 0.04;
+        if (keys["KeyQ"]) player.rotation.y += .04;
+        if (keys["KeyE"]) player.rotation.y -= .04;
         player.position.x = Math.max(-half, Math.min(half, player.position.x));
         player.position.z = Math.max(-half, Math.min(half, player.position.z));
-        if (walking) {
-          walkTime += 0.25;
-          leftLeg.rotation.x = Math.sin(walkTime) * 0.7; rightLeg.rotation.x = -Math.sin(walkTime) * 0.7;
-          body.position.y = 2.1 + Math.abs(Math.sin(walkTime * 2)) * 0.02;
-        } else {
-          leftLeg.rotation.x = 0; rightLeg.rotation.x = 0; body.position.y = 2.1;
+
+        // ── DOOR TRANSITION CHECK (front wall, z ≈ +26, door centred at x=0) ──
+        const nearDoor = player.position.z > 20 && Math.abs(player.position.x) < 3.5;
+        dpEl.style.display = (nearDoor && portalArmed) ? 'block' : 'none';
+        if (nearDoor && player.position.z > 23 && portalArmed) {
+          portalArmed = false;   // prevent double-fire
+          window.parent.postMessage({ type: 'SCENE_TRANSITION', from: 'lab' }, '*');
         }
-        if (pulseRing.visible) {
-          const t = Date.now() * 0.003;
-          pulseMat.opacity = 0.28 + Math.sin(t * 4) * 0.22;
-          const s = 1 + Math.sin(t * 4) * 0.15; pulseRing.scale.set(s, 1, s);
-        }
-        if (firstPerson) {
+        if (walk) { wt += .25; lLeg.rotation.x = Math.sin(wt) * .7; rLeg.rotation.x = -Math.sin(wt) * .7; body.position.y = 2.1 + Math.abs(Math.sin(wt * 2)) * .02; }
+        else { lLeg.rotation.x = 0; rLeg.rotation.x = 0; body.position.y = 2.1; }
+        if (pr.visible) { const t = Date.now() * .003; pmMat.opacity = .3 + Math.sin(t * 4) * .25; const s = 1 + Math.sin(t * 4) * .15; pr.scale.set(s, 1, s); }
+
+        labelMeshes.forEach(m => m.lookAt(camera.position));
+        const t2 = Date.now() * .001;
+        labelMeshes.forEach(m => {
+          const isHov = m === hoveredLabel;
+          m.material.opacity = isHov ? 1 : .92 + Math.sin(t2 * 1.5 + m.position.x) * .08;
+        });
+
+        if (fp) {
           const eye = new THREE.Vector3(0, 3.35, 0).applyQuaternion(player.quaternion).add(player.position);
           camera.position.copy(eye);
-          const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(player.quaternion);
-          camera.lookAt(eye.clone().add(fwd));
+          camera.lookAt(eye.clone().add(new THREE.Vector3(0, 0, 1).applyQuaternion(player.quaternion)));
         } else {
-          tpCamPos.lerp(player.position.clone().add(tpOffset), 0.08);
-          camera.position.copy(tpCamPos); camera.lookAt(player.position);
+          tpPos.lerp(player.position.clone().add(tpOff), .08);
+          camera.position.copy(tpPos); camera.lookAt(player.position);
         }
-        const ft = Date.now() * 0.001;
-        scene.children.forEach(c => { if (c.isPointLight && c.color.b > 0.8) c.intensity = 1.0 + Math.sin(ft * 60 + c.position.x) * 0.01; });
+        const t3 = Date.now() * .001;
+        scene.children.forEach(c => { if (c.isPointLight && c.color.b > .8) c.intensity = .8 + Math.sin(t3 * 60 + c.position.x) * .01; });
+        scene.children.forEach(c => { if (c.isPointLight && c.userData.isDoorGlow) c.intensity = .6 + Math.sin(t3 * 1.8) * .35; });
         renderer.render(scene, camera);
       }
-      animateLab();
+      loop();
+      // Arm the portal after a short delay so first-run movement doesn't false-fire
+      setTimeout(() => { portalArmed = true; }, 1500);
 
-      window.addEventListener("resize", () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+      // ── MESSAGE HANDLER: receives SPAWN_PLAYER from portal.html ──
+      window.addEventListener('message', function (e) {
+        if (!e.data) return;
+        if (e.data.type === 'SPAWN_PLAYER') {
+          // Teleport to just inside the exit door, facing into the room
+          player.position.set(0, 0, 22);
+          player.rotation.y = Math.PI;   // facing -Z (into the lab)
+          tgt = null; cm.visible = false; pr.visible = false;
+          setTimeout(() => { portalArmed = true; }, 1800);
+        }
+        if (e.data.type === 'PING') {
+          window.parent.postMessage({ type: 'PONG', scene: 'lab' }, '*');
+        }
       });
-    }
 
-    window.addEventListener("resize", () => {
-      entryCamera.aspect = window.innerWidth / window.innerHeight;
-      entryCamera.updateProjectionMatrix();
-      entryRenderer.setSize(window.innerWidth, window.innerHeight);
-    });
+      window.addEventListener("resize", () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+    }
+    window.addEventListener("resize", () => { eCam.aspect = innerWidth / innerHeight; eCam.updateProjectionMatrix(); eRend.setSize(innerWidth, innerHeight); });
   </script>
 </body>
 

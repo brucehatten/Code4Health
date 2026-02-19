@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MedWorld Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Rajdhani:wght@600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* CRITICAL: Both iframes are ALWAYS display:block so WebGL never gets a 0-size canvas.
+       We use z-index + pointer-events to show/hide, never display:none.             */
+        .scene-frame {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .scene-frame.active {
+            z-index: 2;
+            pointer-events: auto;
+        }
+
+        /* ── TRANSITION FADE ── */
+        #fadeOverlay {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 9000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.45s ease;
+        }
+
+        #fadeOverlay.opaque {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ── TRANSITION LABEL ── */
+        #transLabel {
+            position: fixed;
+            inset: 0;
+            z-index: 9100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #transLabel.visible {
+            opacity: 1;
+        }
+
+        .tl-sub {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, .3);
+            margin-bottom: 12px;
+        }
+
+        .tl-name {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #fff;
+            margin-bottom: 26px;
+        }
+
+        .tl-bar {
+            width: 140px;
+            height: 1px;
+            background: rgba(255, 255, 255, .15);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+
+        .tl-bar::after {
+            content: '';
+            position: absolute;
+            left: -60%;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .8), transparent);
+            animation: scan 1.0s ease-in-out infinite;
+        }
+
+        @keyframes scan {
+            0% {
+                left: -60%
+            }
+
+            100% {
+                left: 110%
+            }
+        }
+
+        .tl-dots {
+            display: flex;
+            gap: 7px;
+        }
+
+        .tl-dots span {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .5);
+            animation: dp 0.8s ease-in-out infinite;
+        }
+
+        .tl-dots span:nth-child(2) {
+            animation-delay: .18s
+        }
+
+        .tl-dots span:nth-child(3) {
+            animation-delay: .36s
+        }
+
+        @keyframes dp {
+
+            0%,
+            100% {
+                transform: scale(.5);
+                opacity: .25
+            }
+
+            50% {
+                transform: scale(1.3);
+                opacity: 1
+            }
+        }
+
+        /* ── SCENE BADGE (top centre) ── */
+        #sceneBadge {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 8000;
+            font-family: 'DM Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, .55);
+            background: rgba(0, 0, 0, .55);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, .1);
+            border-radius: 20px;
+            padding: 6px 16px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        #badgeDot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ecdc4;
+            box-shadow: 0 0 6px #4ecdc4;
+            transition: background .4s, box-shadow .4s;
+        }
+
+        /* ── CONTROLS HINT ── */
+        #hint {
+            position: fixed;
+            bottom: 12px;
+            right: 14px;
+            z-index: 8000;
+            font-family: 'DM Mono', monospace;
+            font-size: 8px;
+            letter-spacing: 1.5px;
+            color: rgba(255, 255, 255, .18);
+            text-align: right;
+            line-height: 1.9;
+            pointer-events: none;
+        }
+
+        /* ── LOADING SCREEN ── */
+        #loadScreen {
+            position: fixed;
+            inset: 0;
+            background: #060a10;
+            z-index: 9500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity .6s ease;
+        }
+
+        #loadScreen.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .ls-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #4ecdc4, #00e5ff, #7c4dff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .ls-sub {
+            font-family: 'DM Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: rgba(255, 255, 255, .25);
+            margin-bottom: 36px;
+        }
+
+        .ls-bar {
+            width: 180px;
+            height: 2px;
+            background: rgba(255, 255, 255, .07);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .ls-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #4ecdc4, #00e5ff);
+            transition: width 2s ease;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Loading screen -->
+    <div id="loadScreen">
+        <div class="ls-title">MedWorld</div>
+        <div class="ls-sub">Loading environments&hellip;</div>
+        <div class="ls-bar">
+            <div class="ls-fill" id="lsFill"></div>
+        </div>
+    </div>
+
+    <!-- Both frames ALWAYS display:block — z-index controls what's on top -->
+    <iframe id="frameOffice" class="scene-frame active" src="index.html"></iframe>
+    <iframe id="frameLab" class="scene-frame" src="3d-lab-simulation.html"></iframe>
+
+    <!-- Fade overlay -->
+    <div id="fadeOverlay"></div>
+    <div id="transLabel">
+        <div class="tl-sub">Now entering</div>
+        <div class="tl-name" id="tlName">MedLab 3D</div>
+        <div class="tl-bar"></div>
+        <div class="tl-dots"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- HUD -->
+    <div id="sceneBadge">
+        <div id="badgeDot"></div><span id="badgeText">Dr. Chen's Office</span>
+    </div>
+    <div id="hint">CLICK FLOOR TO MOVE &nbsp;|&nbsp; Q/E ROTATE<br>[5] TOGGLE CAMERA &nbsp;|&nbsp; WALK TO GLOWING DOOR
+    </div>
+
+    <script>
+        // ── SCENE REGISTRY ──────────────────────────────────────────────────────
+        const SCENES = {
+            office: { frameId: 'frameOffice', name: "Dr. Chen's Office", color: '#4ecdc4' },
+            lab: { frameId: 'frameLab', name: 'MedLab 3D', color: '#00e5ff' },
+        };
+
+        let current = 'office', transitioning = false;
+
+        const fadeOverlay = document.getElementById('fadeOverlay');
+        const transLabel = document.getElementById('transLabel');
+        const tlName = document.getElementById('tlName');
+        const badgeDot = document.getElementById('badgeDot');
+        const badgeText = document.getElementById('badgeText');
+        const loadScreen = document.getElementById('loadScreen');
+        const lsFill = document.getElementById('lsFill');
+
+        const frame = name => document.getElementById(SCENES[name].frameId);
+
+        function setBadge(name) {
+            const s = SCENES[name];
+            badgeText.textContent = s.name;
+            badgeDot.style.background = s.color;
+            badgeDot.style.boxShadow = `0 0 6px ${s.color}`;
+        }
+
+        function focusActive() {
+            try { frame(current).contentWindow.focus(); } catch (e) { }
+        }
+        document.addEventListener('click', () => setTimeout(focusActive, 40));
+
+        function sendMsg(dest, msg, tries) {
+            tries = tries || 0;
+            try { frame(dest).contentWindow.postMessage(msg, '*'); }
+            catch (e) { if (tries < 6) setTimeout(() => sendMsg(dest, msg, tries + 1), 250); }
+        }
+
+        // ── TRANSITION ──────────────────────────────────────────────────────────
+        function doTransition(to) {
+            if (transitioning || to === current) return;
+            transitioning = true;
+
+            tlName.textContent = SCENES[to].name;
+
+            // Phase 1 — fade to black
+            fadeOverlay.classList.add('opaque');
+
+            setTimeout(() => {
+                // Phase 2 — show label, swap active scene
+                transLabel.classList.add('visible');
+                frame(current).classList.remove('active');
+                frame(to).classList.add('active');
+                current = to;
+                setBadge(to);
+                sendMsg(to, { type: 'SPAWN_PLAYER' });
+                focusActive();
+            }, 420);
+
+            setTimeout(() => {
+                // Phase 3 — fade back in
+                transLabel.classList.remove('visible');
+                fadeOverlay.classList.remove('opaque');
+            }, 920);
+
+            setTimeout(() => { transitioning = false; }, 1450);
+        }
+
+        // ── MESSAGE BUS ─────────────────────────────────────────────────────────
+        window.addEventListener('message', e => {
+            if (!e.data || !e.data.type) return;
+            if (e.data.type === 'SCENE_TRANSITION') {
+                const dest = (e.data.from === 'lab') ? 'office' : 'lab';
+                doTransition(dest);
+            }
+        });
+
+        // ── STARTUP ─────────────────────────────────────────────────────────────
+        // Inject __PORTAL_MODE__ flag into each iframe once it loads,
+        // so t1_mod.html knows to auto-skip the menu.
+        function injectFlag(frameName) {
+            try { frame(frameName).contentWindow.__PORTAL_MODE__ = true; }
+            catch (e) { /* cross-origin sandbox — flag already injected via inline script approach */ }
+        }
+
+        let loaded = 0;
+        function onLoad() {
+            loaded++;
+            lsFill.style.width = (loaded >= 2 ? '100%' : '55%');
+            if (loaded === 1) injectFlag('office');
+            if (loaded === 2) injectFlag('lab');
+            if (loaded >= 2) {
+                setTimeout(() => {
+                    loadScreen.classList.add('hide');
+                    setBadge('office');
+                    focusActive();
+                }, 600);
+            }
+        }
+
+        frame('office').addEventListener('load', onLoad);
+        frame('lab').addEventListener('load', onLoad);
+
+        // Start loading bar animation
+        setTimeout(() => { lsFill.style.width = '30%'; }, 100);
+
+        // Hard fallback: dismiss load screen after 5s
+        setTimeout(() => {
+            loadScreen.classList.add('hide');
+            setBadge(current);
+            focusActive();
+        }, 5000);
+    </script>
+</body>
+
+</html>
