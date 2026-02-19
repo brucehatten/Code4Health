@@ -273,34 +273,43 @@
         </div>
     </div>
 
-    <!-- Both frames ALWAYS display:block — z-index controls what's on top -->
-    <iframe id="frameOffice" class="scene-frame active" src="index.html"></iframe>
+    <!-- All three frames ALWAYS display:block — z-index controls what's on top -->
+    <iframe id="frameWaiting" class="scene-frame active" src="patient_office.html"></iframe>
+    <iframe id="frameOffice" class="scene-frame" src="index.html"></iframe>
     <iframe id="frameLab" class="scene-frame" src="3d-lab-simulation.html"></iframe>
 
     <!-- Fade overlay -->
     <div id="fadeOverlay"></div>
     <div id="transLabel">
         <div class="tl-sub">Now entering</div>
-        <div class="tl-name" id="tlName">MedLab 3D</div>
+        <div class="tl-name" id="tlName">Patient Waiting Room</div>
         <div class="tl-bar"></div>
         <div class="tl-dots"><span></span><span></span><span></span></div>
     </div>
 
     <!-- HUD -->
     <div id="sceneBadge">
-        <div id="badgeDot"></div><span id="badgeText">Dr. Chen's Office</span>
+        <div id="badgeDot"></div><span id="badgeText">Patient Waiting Room</span>
     </div>
     <div id="hint">CLICK FLOOR TO MOVE &nbsp;|&nbsp; Q/E ROTATE<br>[5] TOGGLE CAMERA &nbsp;|&nbsp; WALK TO GLOWING DOOR
-    </div>
+        TO CHANGE ROOMS</div>
 
     <script>
         // ── SCENE REGISTRY ──────────────────────────────────────────────────────
         const SCENES = {
+            waiting: { frameId: 'frameWaiting', name: 'Patient Waiting Room', color: '#a78bfa' },
             office: { frameId: 'frameOffice', name: "Dr. Chen's Office", color: '#4ecdc4' },
             lab: { frameId: 'frameLab', name: 'MedLab 3D', color: '#00e5ff' },
         };
 
-        let current = 'office', transitioning = false;
+        // Navigation cycle: waiting → office → lab → waiting
+        const NEXT_SCENE = {
+            waiting: 'office',
+            office: 'lab',
+            lab: 'waiting',
+        };
+
+        let current = 'waiting', transitioning = false;
 
         const fadeOverlay = document.getElementById('fadeOverlay');
         const transLabel = document.getElementById('transLabel');
@@ -364,7 +373,12 @@
         window.addEventListener('message', e => {
             if (!e.data || !e.data.type) return;
             if (e.data.type === 'SCENE_TRANSITION') {
-                const dest = (e.data.from === 'lab') ? 'office' : 'lab';
+                // Map the sender's "from" key to the correct current scene key
+                const fromKey = e.data.from === 'waiting' ? 'waiting'
+                    : e.data.from === 'office' ? 'office'
+                        : e.data.from === 'lab' ? 'lab'
+                            : current;
+                const dest = e.data.to || NEXT_SCENE[fromKey] || NEXT_SCENE[current];
                 doTransition(dest);
             }
         });
@@ -377,21 +391,24 @@
             catch (e) { /* cross-origin sandbox — flag already injected via inline script approach */ }
         }
 
+        const TOTAL_FRAMES = 3;
         let loaded = 0;
         function onLoad() {
             loaded++;
-            lsFill.style.width = (loaded >= 2 ? '100%' : '55%');
-            if (loaded === 1) injectFlag('office');
-            if (loaded === 2) injectFlag('lab');
-            if (loaded >= 2) {
+            lsFill.style.width = (loaded >= TOTAL_FRAMES ? '100%' : Math.round((loaded / TOTAL_FRAMES) * 80) + '%');
+            if (loaded === 1) injectFlag('waiting');
+            if (loaded === 2) injectFlag('office');
+            if (loaded === 3) injectFlag('lab');
+            if (loaded >= TOTAL_FRAMES) {
                 setTimeout(() => {
                     loadScreen.classList.add('hide');
-                    setBadge('office');
+                    setBadge('waiting');
                     focusActive();
                 }, 600);
             }
         }
 
+        frame('waiting').addEventListener('load', onLoad);
         frame('office').addEventListener('load', onLoad);
         frame('lab').addEventListener('load', onLoad);
 
